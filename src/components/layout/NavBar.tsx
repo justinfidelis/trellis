@@ -59,8 +59,8 @@ export function NavBar() {
               <Button variant="outline" size="sm" onClick={logout}>Sign out</Button>
             </div>
           ) : (
-            <Button variant="outline" size="sm" asChild>
-              <Link to="/login">Sign in</Link>
+            <Button variant="outline" size="sm" nativeButton={false} render={<Link to="/login" />}>
+              Sign in
             </Button>
           )}
         </div>
