@@ -1,12 +1,11 @@
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useSession } from '@/hooks/useSession';
-import { devUsers } from '@/data/session';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Sprout, Search } from 'lucide-react';
 
 export function NavBar() {
-  const { session, login, logout } = useSession();
+  const { session, logout } = useSession();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') ?? '';
@@ -37,22 +36,6 @@ export function NavBar() {
         </div>
 
         <div className="flex items-center gap-3 ml-auto shrink-0">
-          {import.meta.env.DEV && (
-            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-              <span>Dev:</span>
-              <button className="underline" onClick={() => logout()}>None</button>
-              {devUsers.map((u) => (
-                <button
-                  key={u.id}
-                  className={`underline ${session.user?.id === u.id ? 'font-semibold text-foreground' : ''}`}
-                  onClick={() => login(u)}
-                >
-                  {u.name.split(' ')[0]} ({u.role})
-                </button>
-              ))}
-            </div>
-          )}
-
           {session.user ? (
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground hidden sm:block">{session.user.name}</span>
