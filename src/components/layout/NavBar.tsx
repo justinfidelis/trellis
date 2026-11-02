@@ -1,0 +1,70 @@
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useSession } from '@/hooks/useSession';
+import { devUsers } from '@/data/session';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Sprout, Search } from 'lucide-react';
+
+export function NavBar() {
+  const { session, login, logout } = useSession();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const query = searchParams.get('q') ?? '';
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const next = new URLSearchParams(searchParams);
+    if (value) next.set('q', value); else next.delete('q');
+    navigate(`/?${next.toString()}`, { replace: true });
+  };
+
+  return (
+    <header className="border-b bg-background sticky top-0 z-40">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
+        <Link to="/" className="flex items-center gap-2 shrink-0">
+          <Sprout className="h-5 w-5 text-lime-700" />
+          <span className="font-semibold tracking-tight text-lg">Trellis</span>
+        </Link>
+
+        <div className="flex-1 relative max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            className="pl-9 h-9"
+            placeholder="Search books…"
+            value={query}
+            onChange={handleSearch}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 ml-auto shrink-0">
+          {import.meta.env.DEV && (
+            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+              <span>Dev:</span>
+              <button className="underline" onClick={() => logout()}>None</button>
+              {devUsers.map((u) => (
+                <button
+                  key={u.id}
+                  className={`underline ${session.user?.id === u.id ? 'font-semibold text-foreground' : ''}`}
+                  onClick={() => login(u)}
+                >
+                  {u.name.split(' ')[0]} ({u.role})
+                </button>
+              ))}
+            </div>
+          )}
+
+          {session.user ? (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground hidden sm:block">{session.user.name}</span>
+              <Button variant="outline" size="sm" onClick={logout}>Sign out</Button>
+            </div>
+          ) : (
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/login">Sign in</Link>
+            </Button>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}
