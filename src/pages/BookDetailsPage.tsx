@@ -1,6 +1,6 @@
 import { Fragment } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { ChevronRight, ShoppingBasket } from 'lucide-react';
+import { ChevronRight, MessageSquare, ShoppingBasket } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { CoverImage } from '@/components/books/CoverImage';
 import { StatusBadge } from '@/components/requests/StatusBadge';
@@ -65,7 +65,7 @@ export function BookDetailsPage() {
             <CoverImage src={item.cover_url} title={item.title} />
           </div>
 
-          <div className="space-y-4 min-w-0">
+          <div className="space-y-4 min-w-0 flex-1">
             <div className="space-y-0.5">
               <h1 className="text-2xl font-semibold tracking-tight">{item.title}</h1>
               <p className="text-muted-foreground">{item.author}</p>
@@ -76,13 +76,12 @@ export function BookDetailsPage() {
             )}
 
             {item.owner_notes && (
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Owner's note
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-950/40 px-4 py-3 space-y-1">
+                <p className="text-xs font-medium text-amber-600 dark:text-amber-400 uppercase tracking-wide flex items-center gap-1.5">
+                  <MessageSquare className="size-3.5" />
+                  Owner's Note
                 </p>
-                <p className="text-sm text-muted-foreground border-l-2 border-border pl-3">
-                  {item.owner_notes}
-                </p>
+                <p className="text-sm text-foreground/80">{item.owner_notes}</p>
               </div>
             )}
 
