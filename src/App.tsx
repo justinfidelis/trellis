@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { NavBar } from '@/components/layout/NavBar';
 import { GenreNav } from '@/components/layout/GenreNav';
 import { BrowsePage } from '@/pages/BrowsePage';
+import { BookDetailsPage } from '@/pages/BookDetailsPage';
 
 function NotFound() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
         <GenreNav />
         <Routes>
           <Route path="/" element={<BrowsePage />} />
+          <Route path="/book/:id" element={<BookDetailsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
