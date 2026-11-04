@@ -1,33 +1,56 @@
 import { Link } from 'react-router-dom';
+import { ShoppingBasket, User } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { CoverImage } from '@/components/books/CoverImage';
 import { StatusBadge } from '@/components/requests/StatusBadge';
-import type { BookWithStatus } from '@/hooks/useBooks';
+import type { CopyWithBook } from '@/hooks/useBooks';
 
 interface BookCardProps {
-  item: BookWithStatus;
+  item: CopyWithBook;
 }
 
 export function BookCard({ item }: BookCardProps) {
-  const { book, bestStatus } = item;
-  const isAvailable = bestStatus === 'available';
+  const isAvailable = item.status === 'available';
+  const ownerFirstName = item.owner_name.split(' ')[0];
 
   return (
-    <Link to={`/book/${book.id}`} className="group block">
-      <Card className="overflow-hidden transition-shadow group-hover:shadow-md h-full">
-        <div className="aspect-[3/2] relative overflow-hidden">
-          <CoverImage src={book.cover_url} title={book.title} />
+    <Link to={`/book/${item.id}`} className="group block">
+      <Card className="overflow-hidden transition-shadow group-hover:shadow-md h-full ring-transparent group-hover:ring-foreground/10 gap-1">
+        <div className="aspect-[3/2] flex items-center justify-center overflow-hidden">
+          <div className="h-full aspect-[3/4] overflow-hidden">
+            <CoverImage src={item.cover_url} title={item.title} />
+          </div>
         </div>
-        <CardContent className="p-3 space-y-1.5">
+        <CardContent className="p-3 space-y-2">
           <div className="space-y-0.5">
             <p className={`font-medium text-sm leading-snug line-clamp-2 ${!isAvailable ? 'text-muted-foreground' : ''}`}>
-              {book.title}
+              {item.title}
             </p>
-            <p className="text-muted-foreground text-xs">{book.author}</p>
+            <p className="text-muted-foreground text-xs">{item.author}</p>
           </div>
-          <StatusBadge status={bestStatus} />
+          <div className="flex items-center gap-2">
+            <StatusBadge status={item.status} />
+            <div className="ml-auto flex items-center gap-1 text-muted-foreground">
+              <User className="size-3" />
+              <span className="text-xs">{ownerFirstName}</span>
+            </div>
+          </div>
+          <div className="pt-2">
+            <Button
+              size="sm"
+              variant={isAvailable ? 'default' : 'secondary'}
+              disabled={!isAvailable}
+              className="w-full"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+            >
+              <ShoppingBasket />
+              Add to basket
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </Link>
   );
 }
+

@@ -1,52 +1,42 @@
 import { useMemo } from 'react';
-import { mockBooks, mockCopies } from '@/data/mock';
+import { mockBooks, mockCopies, mockUsers } from '@/data/mock';
 import { GENRES, subtreeIds } from '@/lib/constants';
-import type { Book, CopyStatus } from '@/data/types';
+import type { Book, Copy } from '@/data/types';
 
-export interface BookWithStatus {
-  book: Book;
-  bestStatus: CopyStatus;
-}
+export type CopyWithBook = Omit<Book, 'id' | 'created_at'> & Copy & { owner_name: string };
 
-function bestCopyStatus(bookId: string): CopyStatus {
-  const copies = mockCopies.filter((c) => c.book_id === bookId);
-  if (copies.length === 0) return 'unavailable';
-  const order: CopyStatus[] = ['available', 'reserved', 'on_loan', 'unavailable'];
-  for (const status of order) {
-    if (copies.some((c) => c.status === status)) return status;
-  }
-  return 'unavailable';
+function ownerName(ownerId: string): string {
+  return mockUsers.find((u) => u.id === ownerId)?.name ?? 'Unknown';
 }
 
 export function useBooks(query: string, genreId: string) {
-  const books = useMemo<BookWithStatus[]>(() => {
+  return useMemo<CopyWithBook[]>(() => {
     const q = query.toLowerCase();
     const matchIds = genreId ? new Set(subtreeIds(genreId)) : null;
-    return mockBooks
-      .filter((b) => {
-        const matchesQuery =
-          !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q);
-        const matchesGenre = !matchIds || matchIds.has(b.genre_id);
-        return matchesQuery && matchesGenre;
-      })
-      .map((book) => ({ book, bestStatus: bestCopyStatus(book.id) }));
-  }, [query, genreId]);
 
-  return books;
+    return mockCopies.flatMap((copy) => {
+      if (copy.status === 'unavailable') return [];
+      const book = mockBooks.find((b) => b.id === copy.book_id);
+      if (!book) return [];
+      const matchesQuery =
+        !q || book.title.toLowerCase().includes(q) || book.author.toLowerCase().includes(q);
+      const matchesGenre = !matchIds || matchIds.has(book.genre_id);
+      if (!matchesQuery || !matchesGenre) return [];
+      return [{ ...book, ...copy, owner_name: ownerName(copy.owner_id) }];
+    });
+  }, [query, genreId]);
+}
+
+export function useCopyWithBook(copyId: string): CopyWithBook | undefined {
+  return useMemo(() => {
+    const copy = mockCopies.find((c) => c.id === copyId);
+    if (!copy) return undefined;
+    const book = mockBooks.find((b) => b.id === copy.book_id);
+    if (!book) return undefined;
+    return { ...book, ...copy, owner_name: ownerName(copy.owner_id) };
+  }, [copyId]);
 }
 
 export function useGenres() {
   return GENRES;
-}
-
-export function useBook(bookId: string): BookWithStatus | undefined {
-  return useMemo(() => {
-    const book = mockBooks.find((b) => b.id === bookId);
-    if (!book) return undefined;
-    return { book, bestStatus: bestCopyStatus(book.id) };
-  }, [bookId]);
-}
-
-export function useBookCopies(bookId: string) {
-  return mockCopies.filter((c) => c.book_id === bookId);
 }

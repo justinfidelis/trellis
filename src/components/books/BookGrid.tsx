@@ -1,8 +1,8 @@
-import type { BookWithStatus } from '@/hooks/useBooks';
+import type { CopyWithBook } from '@/hooks/useBooks';
 import { BookCard } from '@/components/books/BookCard';
 
 interface BookGridProps {
-  books: BookWithStatus[];
+  books: CopyWithBook[];
 }
 
 export function BookGrid({ books }: BookGridProps) {
@@ -15,7 +15,7 @@ export function BookGrid({ books }: BookGridProps) {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {books.map((item) => (
-        <BookCard key={item.book.id} item={item} />
+        <BookCard key={item.id} item={item} />
       ))}
     </div>
   );
