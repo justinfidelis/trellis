@@ -6,6 +6,7 @@ import { CoverImage } from '@/components/books/CoverImage';
 import { StatusBadge } from '@/components/requests/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { useCopyWithBook } from '@/hooks/useBooks';
+import { useBasket } from '@/context/BasketContext';
 import { mockUsers } from '@/data/mock';
 import { GENRES } from '@/lib/constants';
 
@@ -54,6 +55,8 @@ export function BookDetailsPage() {
   const owner = mockUsers.find((u) => u.id === item.owner_id);
   const genre = GENRES.find((g) => g.id === item.genre_id);
   const isAvailable = item.status === 'available';
+  const { hasItem, addItem, removeItem } = useBasket();
+  const inBasket = hasItem(item.id);
 
   return (
     <PageShell>
@@ -104,9 +107,13 @@ export function BookDetailsPage() {
               </div>
             )}
 
-            <Button size="sm" variant={isAvailable ? 'default' : 'secondary'}>
+            <Button
+              size="sm"
+              variant={inBasket ? 'outline' : isAvailable ? 'default' : 'secondary'}
+              onClick={() => inBasket ? removeItem(item.id) : addItem(item.id)}
+            >
               <ShoppingBasket />
-              {isAvailable ? 'Add to basket' : 'Reserve'}
+              {inBasket ? 'In basket' : isAvailable ? 'Add to basket' : 'Reserve'}
             </Button>
           </div>
         </div>
