@@ -53,6 +53,7 @@ export function BookDetailsPage() {
 
   const owner = mockUsers.find((u) => u.id === item.owner_id);
   const genre = GENRES.find((g) => g.id === item.genre_id);
+  const isAvailable = item.status === 'available';
 
   return (
     <PageShell>
@@ -75,19 +76,24 @@ export function BookDetailsPage() {
             )}
 
             {item.owner_notes && (
-              <p className="text-sm text-muted-foreground italic border-l-2 border-border pl-3">
-                {item.owner_notes}
-              </p>
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                  Owner's note
+                </p>
+                <p className="text-sm text-muted-foreground border-l-2 border-border pl-3">
+                  {item.owner_notes}
+                </p>
+              </div>
             )}
 
             <div className="flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-3">
-                <span className="text-muted-foreground w-20 shrink-0">Status</span>
-                <StatusBadge status={item.status} />
-              </div>
-              <div className="flex items-center gap-3">
                 <span className="text-muted-foreground w-20 shrink-0">Owned by</span>
                 <span>{owner?.name ?? '—'}</span>
+              </div>
+              <div className="flex items-center gap-3">
+                <span className="text-muted-foreground w-20 shrink-0">Status</span>
+                <StatusBadge status={item.status} />
               </div>
             </div>
 
@@ -99,9 +105,9 @@ export function BookDetailsPage() {
               </div>
             )}
 
-            <Button size="sm">
+            <Button size="sm" variant={isAvailable ? 'default' : 'secondary'}>
               <ShoppingBasket />
-              Add to basket
+              {isAvailable ? 'Add to basket' : 'Reserve'}
             </Button>
           </div>
         </div>

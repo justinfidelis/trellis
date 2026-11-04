@@ -30,22 +30,21 @@ export function BookCard({ item }: BookCardProps) {
             <p className="text-muted-foreground text-xs">{item.author}</p>
           </div>
           <div className="flex items-center gap-2">
-            <StatusBadge status={item.status} />
-            <div className="ml-auto flex items-center gap-1 text-muted-foreground">
+            <div className="flex items-center gap-1 text-muted-foreground">
               <User className="size-3" />
               <span className="text-xs">{ownerFirstName}</span>
             </div>
+            {!isAvailable && <div className="ml-auto"><StatusBadge status={item.status} /></div>}
           </div>
           <div className="pt-2">
             <Button
               size="sm"
               variant={isAvailable ? 'default' : 'secondary'}
-              disabled={!isAvailable}
               className="w-full"
               onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
             >
               <ShoppingBasket />
-              Add to basket
+              {isAvailable ? 'Add to basket' : 'Reserve'}
             </Button>
           </div>
         </CardContent>
