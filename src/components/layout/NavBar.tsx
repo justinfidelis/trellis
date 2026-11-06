@@ -19,6 +19,7 @@ export function NavBar() {
     if (e.key !== 'Enter') return;
     const next = new URLSearchParams(searchParams);
     if (inputValue) next.set('q', inputValue); else next.delete('q');
+    next.delete('page');
     navigate(`/?${next.toString()}`);
   };
 
