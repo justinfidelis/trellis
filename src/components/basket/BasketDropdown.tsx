@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { ShoppingBasket, X } from 'lucide-react';
 import { useBasket, BASKET_LIMIT } from '@/context/BasketContext';
 import { useCopiesWithBooks } from '@/hooks/useBooks';
@@ -74,7 +75,7 @@ export function BasketDropdown({ onClose }: BasketDropdownProps) {
       )}
 
       <div className="px-4 py-3 border-t">
-        <Button size="sm" className="w-full" disabled={copies.length === 0}>
+        <Button size="sm" className="w-full" disabled={copies.length === 0} nativeButton={false} render={<Link to="/basket" />} onClick={onClose}>
           <ShoppingBasket />
           Checkout
         </Button>

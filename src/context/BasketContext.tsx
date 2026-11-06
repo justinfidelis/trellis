@@ -14,6 +14,7 @@ interface BasketContextValue {
   hasItem: (id: string) => boolean;
   addItem: (id: string) => void;
   removeItem: (id: string) => void;
+  clearItems: () => void;
 }
 
 const BasketContext = createContext<BasketContextValue | null>(null);
@@ -52,8 +53,13 @@ export function BasketProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const clearItems = () => {
+    setItems([]);
+    writeStorage([]);
+  };
+
   return (
-    <BasketContext.Provider value={{ items, count: items.length, atLimit: items.length >= BASKET_LIMIT, hasItem, addItem, removeItem }}>
+    <BasketContext.Provider value={{ items, count: items.length, atLimit: items.length >= BASKET_LIMIT, hasItem, addItem, removeItem, clearItems }}>
       {children}
     </BasketContext.Provider>
   );
