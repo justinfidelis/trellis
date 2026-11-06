@@ -55,6 +55,7 @@ export function GenreNav() {
   const goToGenre = (genrePath: string) => {
     const next = new URLSearchParams(searchParams);
     if (genrePath) next.set('genre', genrePath); else next.delete('genre');
+    next.delete('page');
     navigate(`/?${next.toString()}`);
   };
 

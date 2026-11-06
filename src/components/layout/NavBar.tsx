@@ -9,7 +9,7 @@ import { Sprout, Search, ShoppingBasket } from 'lucide-react';
 
 export function NavBar() {
   const { session, logout } = useSession();
-  const { count } = useBasket();
+  const { count, atLimit } = useBasket();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [inputValue, setInputValue] = useState(searchParams.get('q') ?? '');
@@ -19,6 +19,7 @@ export function NavBar() {
     if (e.key !== 'Enter') return;
     const next = new URLSearchParams(searchParams);
     if (inputValue) next.set('q', inputValue); else next.delete('q');
+    next.delete('page');
     navigate(`/?${next.toString()}`);
   };
 
@@ -49,7 +50,7 @@ export function NavBar() {
             >
               <ShoppingBasket className="h-5 w-5" />
               {count > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-lime-600 text-[10px] font-semibold text-white">
+                <span className={`absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full text-[10px] font-semibold text-white ${atLimit ? 'bg-amber-500' : 'bg-lime-600'}`}>
                   {count}
                 </span>
               )}
