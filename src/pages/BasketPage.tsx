@@ -70,19 +70,13 @@ export function BasketPage() {
     <PageShell>
       <div className="space-y-6">
         <div className="space-y-0.5">
-          <h1 className="text-2xl font-semibold tracking-tight">My Basket</h1>
-          <p className="text-sm text-muted-foreground">
-            {copies.length} of {BASKET_LIMIT} books
-          </p>
-        </div>
-
-        {atLimit && (
-          <div className="rounded-lg bg-amber-100 dark:bg-amber-950/60 px-4 py-3">
-            <p className="text-sm text-amber-800 dark:text-amber-300">
-              You've reached the {BASKET_LIMIT}-book limit. Remove a book to add another.
-            </p>
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-2xl font-semibold tracking-tight">My Basket</h1>
+            <span className={`text-sm font-medium ${atLimit ? 'text-amber-500' : 'text-muted-foreground'}`}>
+              {copies.length} / {BASKET_LIMIT}
+            </span>
           </div>
-        )}
+        </div>
 
         {copies.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-20 text-center">

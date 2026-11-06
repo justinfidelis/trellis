@@ -30,8 +30,11 @@ export function BasketDropdown({ onClose }: BasketDropdownProps) {
       ref={ref}
       className="absolute right-0 top-full mt-2 w-80 rounded-lg border bg-background shadow-lg z-50 flex flex-col"
     >
-      <div className="px-4 py-3 border-b">
+      <div className="px-4 py-3 border-b flex items-center justify-between">
         <p className="font-medium text-sm">My Basket</p>
+        <span className={`text-xs font-medium ${atLimit ? 'text-amber-500' : 'text-muted-foreground'}`}>
+          {items.length} / {BASKET_LIMIT}
+        </span>
       </div>
 
       {copies.length === 0 ? (
@@ -64,14 +67,6 @@ export function BasketDropdown({ onClose }: BasketDropdownProps) {
             );
           })}
         </ul>
-      )}
-
-      {atLimit && (
-        <div className="px-4 py-2 bg-amber-100 dark:bg-amber-950/60 border-t">
-          <p className="text-xs text-amber-800 dark:text-amber-300">
-            You've reached the {BASKET_LIMIT}-book limit.
-          </p>
-        </div>
       )}
 
       <div className="px-4 py-3 border-t">

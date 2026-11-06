@@ -38,7 +38,7 @@ export function BasketProvider({ children }: { children: React.ReactNode }) {
 
   const addItem = (id: string) => {
     setItems((prev) => {
-      if (prev.includes(id)) return prev;
+      if (prev.includes(id) || prev.length >= BASKET_LIMIT) return prev;
       const next = [...prev, id];
       writeStorage(next);
       return next;
