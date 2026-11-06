@@ -45,7 +45,7 @@ export function BookCard({ item }: BookCardProps) {
             {disabled ? (
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger render={<span className="block w-full" />}>
+                  <TooltipTrigger render={<span className="block w-full" onClick={(e) => { e.preventDefault(); e.stopPropagation(); }} />}>
                     <Button
                       size="sm"
                       variant={isAvailable ? 'default' : 'secondary'}
