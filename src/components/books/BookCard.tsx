@@ -32,7 +32,7 @@ export function BookCard({ item }: BookCardProps) {
             </p>
             <p className="text-muted-foreground text-xs">{item.author}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 h-5">
             <div className="flex items-center gap-1 text-muted-foreground">
               <User className="size-3" />
               <span className="text-xs">{ownerFirstName}</span>
