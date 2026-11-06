@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CoverImage } from '@/components/books/CoverImage';
 import { StatusBadge } from '@/components/requests/StatusBadge';
+import { useBasket } from '@/context/BasketContext';
 import type { CopyWithBook } from '@/hooks/useBooks';
 
 interface BookCardProps {
@@ -13,6 +14,8 @@ interface BookCardProps {
 export function BookCard({ item }: BookCardProps) {
   const isAvailable = item.status === 'available';
   const ownerFirstName = item.owner_name.split(' ')[0];
+  const { hasItem, addItem, removeItem } = useBasket();
+  const inBasket = hasItem(item.id);
 
   return (
     <Link to={`/book/${item.id}`} className="group block">
@@ -39,12 +42,16 @@ export function BookCard({ item }: BookCardProps) {
           <div className="pt-2">
             <Button
               size="sm"
-              variant={isAvailable ? 'default' : 'secondary'}
+              variant={inBasket ? 'outline' : isAvailable ? 'default' : 'secondary'}
               className="w-full"
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                inBasket ? removeItem(item.id) : addItem(item.id);
+              }}
             >
               <ShoppingBasket />
-              {isAvailable ? 'Add to basket' : 'Reserve'}
+              {inBasket ? 'In basket' : isAvailable ? 'Add to basket' : 'Reserve'}
             </Button>
           </div>
         </CardContent>

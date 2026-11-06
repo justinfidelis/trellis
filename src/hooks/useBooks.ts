@@ -40,3 +40,15 @@ export function useCopyWithBook(copyId: string): CopyWithBook | undefined {
 export function useGenres() {
   return GENRES;
 }
+
+export function useCopiesWithBooks(copyIds: string[]): CopyWithBook[] {
+  return useMemo(() => {
+    return copyIds.flatMap((id) => {
+      const copy = mockCopies.find((c) => c.id === id);
+      if (!copy) return [];
+      const book = mockBooks.find((b) => b.id === copy.book_id);
+      if (!book) return [];
+      return [{ ...book, ...copy, owner_name: ownerName(copy.owner_id) }];
+    });
+  }, [copyIds]);
+}

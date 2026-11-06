@@ -4,9 +4,10 @@ interface CoverImageProps {
   src: string | null;
   title: string;
   className?: string;
+  iconClassName?: string;
 }
 
-export function CoverImage({ src, title, className = '' }: CoverImageProps) {
+export function CoverImage({ src, title, className = '', iconClassName = 'w-10 h-10' }: CoverImageProps) {
   if (src) {
     return (
       <img
@@ -21,7 +22,7 @@ export function CoverImage({ src, title, className = '' }: CoverImageProps) {
     <div
       className={`flex items-center justify-center w-full h-full bg-muted text-muted-foreground ${className}`}
     >
-      <BookOpen className="w-10 h-10 opacity-40" />
+      <BookOpen className={`opacity-40 ${iconClassName}`} />
     </div>
   );
 }

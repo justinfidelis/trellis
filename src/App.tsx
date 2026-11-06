@@ -3,6 +3,8 @@ import { NavBar } from '@/components/layout/NavBar';
 import { GenreNav } from '@/components/layout/GenreNav';
 import { BrowsePage } from '@/pages/BrowsePage';
 import { BookDetailsPage } from '@/pages/BookDetailsPage';
+import { BasketPage } from '@/pages/BasketPage';
+import { BasketProvider } from '@/context/BasketContext';
 
 function NotFound() {
   return (
@@ -15,15 +17,18 @@ function NotFound() {
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col">
-        <NavBar />
-        <GenreNav />
-        <Routes>
-          <Route path="/" element={<BrowsePage />} />
-          <Route path="/book/:id" element={<BookDetailsPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
+      <BasketProvider>
+        <div className="min-h-screen flex flex-col">
+          <NavBar />
+          <GenreNav />
+          <Routes>
+            <Route path="/" element={<BrowsePage />} />
+            <Route path="/book/:id" element={<BookDetailsPage />} />
+            <Route path="/basket" element={<BasketPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </BasketProvider>
     </BrowserRouter>
   );
 }
