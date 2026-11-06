@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ShoppingBasket, User } from 'lucide-react';
+import { ShoppingBasket, User, Check } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CoverImage } from '@/components/books/CoverImage';
@@ -43,14 +43,14 @@ export function BookCard({ item }: BookCardProps) {
             <Button
               size="sm"
               variant={inBasket ? 'outline' : isAvailable ? 'default' : 'secondary'}
-              className="w-full"
+              className={`w-full${!isAvailable && !inBasket ? ' bg-white text-lime-700 border-lime-600 hover:bg-lime-50' : ''}`}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 inBasket ? removeItem(item.id) : addItem(item.id);
               }}
             >
-              <ShoppingBasket />
+              {inBasket ? <Check /> : <ShoppingBasket />}
               {inBasket ? 'In basket' : isAvailable ? 'Add to basket' : 'Reserve'}
             </Button>
           </div>

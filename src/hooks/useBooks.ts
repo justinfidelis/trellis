@@ -9,13 +9,14 @@ function ownerName(ownerId: string): string {
   return mockUsers.find((u) => u.id === ownerId)?.name ?? 'Unknown';
 }
 
-export function useBooks(query: string, genreId: string) {
+export function useBooks(query: string, genreId: string, availableOnly = false) {
   return useMemo<CopyWithBook[]>(() => {
     const q = query.toLowerCase();
     const matchIds = genreId ? new Set(subtreeIds(genreId)) : null;
 
     return mockCopies.flatMap((copy) => {
       if (copy.status === 'unavailable') return [];
+      if (availableOnly && copy.status !== 'available') return [];
       const book = mockBooks.find((b) => b.id === copy.book_id);
       if (!book) return [];
       const matchesQuery =
@@ -24,7 +25,7 @@ export function useBooks(query: string, genreId: string) {
       if (!matchesQuery || !matchesGenre) return [];
       return [{ ...book, ...copy, owner_name: ownerName(copy.owner_id) }];
     });
-  }, [query, genreId]);
+  }, [query, genreId, availableOnly]);
 }
 
 export function useCopyWithBook(copyId: string): CopyWithBook | undefined {
