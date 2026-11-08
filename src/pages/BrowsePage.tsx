@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronRight, ChevronLeft } from 'lucide-react';
 import { BookGrid } from '@/components/books/BookGrid';
+import { GenreNav } from '@/components/layout/GenreNav';
 import { PageShell } from '@/components/layout/PageShell';
 import { useBooks } from '@/hooks/useBooks';
 import { GENRES, getGenreByPath } from '@/lib/constants';
@@ -85,7 +86,9 @@ export function BrowsePage() {
     nav({ per_page: size === DEFAULT_PER_PAGE ? null : String(size), page: null });
 
   return (
-    <PageShell>
+    <>
+      <GenreNav />
+      <PageShell>
       <div className="space-y-6">
         <div className="space-y-1">
           <div className="flex items-center justify-between">
@@ -149,5 +152,6 @@ export function BrowsePage() {
         )}
       </div>
     </PageShell>
+    </>
   );
 }
