@@ -1,0 +1,15 @@
+name = "trellis"
+compatibility_date = "2024-12-18"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "trellis-db"
+database_id = "790fa3f0-1223-4eaa-a0df-0c4fa03ed64e"
+
+[[r2_buckets]]
+binding = "R2"
+bucket_name = "trellis-covers"
+
+[vars]
+ENVIRONMENT = "production"
