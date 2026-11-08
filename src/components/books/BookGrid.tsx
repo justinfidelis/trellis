@@ -3,9 +3,16 @@ import { BookCard } from '@/components/books/BookCard';
 
 interface BookGridProps {
   books: CopyWithBook[];
+  isPending?: boolean;
 }
 
-export function BookGrid({ books }: BookGridProps) {
+export function BookGrid({ books, isPending }: BookGridProps) {
+  if (isPending) {
+    return (
+      <p className="text-muted-foreground text-sm py-12 text-center">Loading…</p>
+    );
+  }
+
   if (books.length === 0) {
     return (
       <p className="text-muted-foreground text-sm py-12 text-center">No books found.</p>

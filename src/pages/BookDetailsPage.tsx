@@ -7,7 +7,6 @@ import { StatusBadge } from '@/components/requests/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { useCopyWithBook } from '@/hooks/useBooks';
 import { useBasket } from '@/context/BasketContext';
-import { mockUsers } from '@/data/mock';
 import { GENRES } from '@/lib/constants';
 
 function BookBreadcrumbs({ genre_id, title }: { genre_id: string; title: string }) {
@@ -42,9 +41,13 @@ function BookBreadcrumbs({ genre_id, title }: { genre_id: string; title: string 
 
 export function BookDetailsPage() {
   const { id } = useParams<{ id: string }>();
-  const item = useCopyWithBook(id ?? '');
+  const { data: item, isPending, isError } = useCopyWithBook(id ?? '');
 
-  if (!item) {
+  if (isPending) {
+    return <PageShell><p className="text-muted-foreground">Loading…</p></PageShell>;
+  }
+
+  if (isError || !item) {
     return (
       <PageShell>
         <p className="text-muted-foreground">Book not found.</p>
@@ -52,7 +55,6 @@ export function BookDetailsPage() {
     );
   }
 
-  const owner = mockUsers.find((u) => u.id === item.owner_id);
   const genre = GENRES.find((g) => g.id === item.genre_id);
   const isAvailable = item.status === 'available';
   const { hasItem, addItem, removeItem } = useBasket();
@@ -91,7 +93,7 @@ export function BookDetailsPage() {
             <div className="flex flex-col gap-2 text-sm">
               <div className="flex items-center gap-3">
                 <span className="text-muted-foreground w-20 shrink-0">Owned by</span>
-                <span>{owner?.name ?? '—'}</span>
+                <span>{item.owner_name ?? '—'}</span>
               </div>
               <div className="flex items-center gap-3">
                 <span className="text-muted-foreground w-20 shrink-0">Status</span>

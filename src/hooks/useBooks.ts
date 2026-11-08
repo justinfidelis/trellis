@@ -1,55 +1,61 @@
-import { useMemo } from 'react';
-import { mockBooks, mockCopies, mockUsers } from '@/data/mock';
+import { useQuery } from '@tanstack/react-query';
 import { GENRES, subtreeIds } from '@/lib/constants';
-import type { Book, Copy } from '@/data/types';
+import type { Book, Copy, Genre } from '@/data/types';
 
 export type CopyWithBook = Omit<Book, 'id' | 'created_at'> & Copy & { owner_name: string };
 
-function ownerName(ownerId: string): string {
-  return mockUsers.find((u) => u.id === ownerId)?.name ?? 'Unknown';
+async function fetchBooks(query: string, genrePath: string, availableOnly: boolean): Promise<CopyWithBook[]> {
+  const params = new URLSearchParams();
+  if (query) params.set('q', query);
+  if (genrePath) params.set('genre', genrePath);
+  if (availableOnly) params.set('available', 'true');
+  const res = await fetch(`/api/books?${params}`);
+  if (!res.ok) throw new Error('Failed to fetch books');
+  return res.json();
 }
 
 export function useBooks(query: string, genreId: string, availableOnly = false) {
-  return useMemo<CopyWithBook[]>(() => {
-    const q = query.toLowerCase();
-    const matchIds = genreId ? new Set(subtreeIds(genreId)) : null;
-
-    return mockCopies.flatMap((copy) => {
-      if (copy.status === 'unavailable') return [];
-      if (availableOnly && copy.status !== 'available') return [];
-      const book = mockBooks.find((b) => b.id === copy.book_id);
-      if (!book) return [];
-      const matchesQuery =
-        !q || book.title.toLowerCase().includes(q) || book.author.toLowerCase().includes(q);
-      const matchesGenre = !matchIds || matchIds.has(book.genre_id);
-      if (!matchesQuery || !matchesGenre) return [];
-      return [{ ...book, ...copy, owner_name: ownerName(copy.owner_id) }];
-    });
-  }, [query, genreId, availableOnly]);
+  const genre = genreId ? GENRES.find((g) => g.id === genreId) : null;
+  const genrePath = genre?.path ?? '';
+  return useQuery({
+    queryKey: ['books', query, genrePath, availableOnly],
+    queryFn: () => fetchBooks(query, genrePath, availableOnly),
+  });
 }
 
-export function useCopyWithBook(copyId: string): CopyWithBook | undefined {
-  return useMemo(() => {
-    const copy = mockCopies.find((c) => c.id === copyId);
-    if (!copy) return undefined;
-    const book = mockBooks.find((b) => b.id === copy.book_id);
-    if (!book) return undefined;
-    return { ...book, ...copy, owner_name: ownerName(copy.owner_id) };
-  }, [copyId]);
+export function useCopyWithBook(copyId: string) {
+  return useQuery({
+    queryKey: ['copy', copyId],
+    queryFn: async (): Promise<CopyWithBook | null> => {
+      const res = await fetch(`/api/books/${copyId}`);
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error('Failed to fetch copy');
+      return res.json();
+    },
+    enabled: !!copyId,
+  });
 }
 
-export function useGenres() {
+export function useGenres(): Genre[] {
   return GENRES;
 }
 
-export function useCopiesWithBooks(copyIds: string[]): CopyWithBook[] {
-  return useMemo(() => {
-    return copyIds.flatMap((id) => {
-      const copy = mockCopies.find((c) => c.id === id);
-      if (!copy) return [];
-      const book = mockBooks.find((b) => b.id === copy.book_id);
-      if (!book) return [];
-      return [{ ...book, ...copy, owner_name: ownerName(copy.owner_id) }];
-    });
-  }, [copyIds]);
+export function useCopiesWithBooks(copyIds: string[]) {
+  return useQuery({
+    queryKey: ['copies', copyIds],
+    queryFn: async (): Promise<CopyWithBook[]> => {
+      const results = await Promise.all(
+        copyIds.map(async (id) => {
+          const res = await fetch(`/api/books/${id}`);
+          if (!res.ok) return null;
+          return res.json() as Promise<CopyWithBook>;
+        })
+      );
+      return results.filter((r): r is CopyWithBook => r !== null);
+    },
+    enabled: copyIds.length > 0,
+  });
 }
+
+// Kept for subtree filtering in GenreNav
+export { subtreeIds };
