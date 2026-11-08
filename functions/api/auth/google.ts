@@ -12,6 +12,14 @@ export async function onRequest(context: EventContext<Env, string, Record<string
   const redirectUri = `${origin}/api/auth/callback`;
   const state = crypto.randomUUID();
 
-  const url = getGoogleAuthUrl(GOOGLE_CLIENT_ID, redirectUri, state);
-  return Response.redirect(url, 302);
+  const authUrl = getGoogleAuthUrl(GOOGLE_CLIENT_ID, redirectUri, state);
+
+  return new Response(null, {
+    status: 302,
+    headers: {
+      Location: authUrl,
+      // Short-lived cookie — just needs to survive the round-trip to Google
+      'Set-Cookie': `oauth_state=${state}; HttpOnly; SameSite=Lax; Path=/api/auth; Max-Age=600`,
+    },
+  });
 }

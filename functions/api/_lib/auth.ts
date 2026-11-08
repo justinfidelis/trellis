@@ -12,7 +12,7 @@ export function getSessionCookie(request: Request): string | null {
 }
 
 export function setSessionCookie(sessionId: string, secure: boolean): string {
-  const flags = ['HttpOnly', 'SameSite=Lax', 'Path=/'];
+  const flags = ['HttpOnly', 'SameSite=Lax', 'Path=/', 'Max-Age=604800'];
   if (secure) flags.push('Secure');
   return `${COOKIE_NAME}=${sessionId}; ${flags.join('; ')}`;
 }

@@ -1,5 +1,5 @@
 import {
-  getCopyById, getNextInQueue, getRequestById, getUserById,
+  getBookById, getNextInQueue, getRequestById, getUserById,
   updateCopy, updateRequest,
 } from '../_lib/db';
 import { error, forbidden, json, methodNotAllowed, notFound, unauthorized } from '../_lib/response';
@@ -48,21 +48,18 @@ export async function onRequest(context: AppContext) {
 
       const lender = await getUserById(context.env.DB, req.lender_id);
       if (lender?.tele_handle) {
-        // Look up book title from the copy's book
-        const copy = await getCopyById(context.env.DB, req.copy_id);
-        if (copy) {
-          context.waitUntil(
-            sendTelegramMessage(
-              context.env.BOT_TOKEN,
-              lender.tele_handle,
-              queueAdvancedNotificationText({
-                bookTitle: req.book_id, // will be replaced by title lookup below
-                borrowerName: next.borrower_name,
-                borrowerTele: next.borrower_tele,
-              })
-            )
-          );
-        }
+        const book = await getBookById(context.env.DB, req.book_id);
+        context.waitUntil(
+          sendTelegramMessage(
+            context.env.BOT_TOKEN,
+            lender.tele_handle,
+            queueAdvancedNotificationText({
+              bookTitle: (book as { title?: string } | null)?.title ?? req.book_id,
+              borrowerName: next.borrower_name,
+              borrowerTele: next.borrower_tele,
+            })
+          )
+        );
       }
     } else {
       await updateCopy(context.env.DB, req.copy_id, { status: 'available' });
