@@ -52,7 +52,14 @@ export interface Request {
   returned_at: string | null;
 }
 
+export interface Passcode {
+  id: string;
+  code: string;
+  label: string;
+  active: boolean;
+  created_at: string;
+}
+
 export interface Settings {
-  passphrase: string;
   max_active_requests: number;
 }

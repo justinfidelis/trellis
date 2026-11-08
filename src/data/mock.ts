@@ -1,4 +1,4 @@
-import type { Book, Copy, Request, Settings, User } from './types';
+import type { Book, Copy, Passcode, Request, Settings, User } from './types';
 
 export const mockUsers: User[] = [
   {
@@ -167,7 +167,11 @@ export const mockRequests: Request[] = [
   { id: 'r8', book_id: 'b10', lender_id: 'u1', copy_id: 'c12', borrower_name: 'Kevin Tan', borrower_tele: 'kevintan', status: 'on_loan', requested_at: '2025-03-23T09:00:00Z', ready_at: '2025-03-24T09:00:00Z', loaned_at: '2025-03-26T09:00:00Z', returned_at: null },
 ];
 
+export const mockPasscodes: Passcode[] = [
+  { id: 'p1', code: 'garden', label: 'Main group', active: true, created_at: '2025-01-01T00:00:00Z' },
+  { id: 'p2', code: 'trellis', label: 'Friends & family', active: true, created_at: '2025-01-01T00:00:00Z' },
+];
+
 export const mockSettings: Settings = {
-  passphrase: 'garden',
   max_active_requests: 2,
 };
