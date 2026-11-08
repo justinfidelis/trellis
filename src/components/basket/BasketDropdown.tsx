@@ -12,7 +12,7 @@ interface BasketDropdownProps {
 
 export function BasketDropdown({ onClose }: BasketDropdownProps) {
   const { items, atLimit, removeItem } = useBasket();
-  const copies = useCopiesWithBooks(items);
+  const { data: copies = [] } = useCopiesWithBooks(items);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

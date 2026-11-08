@@ -59,7 +59,7 @@ export function BrowsePage() {
 
   const currentGenre = genrePath ? getGenreByPath(genrePath) : null;
   const genreId = currentGenre?.id ?? '';
-  const allBooks = useBooks(query, genreId, availableOnly);
+  const { data: allBooks = [], isPending } = useBooks(query, genreId, availableOnly);
 
   const totalPages = Math.max(1, Math.ceil(allBooks.length / validPerPage));
   const currentPage = Math.min(page, totalPages);
@@ -103,7 +103,7 @@ export function BrowsePage() {
           <Breadcrumbs genrePath={genrePath} />
         </div>
 
-        <BookGrid books={books} />
+        <BookGrid books={books} isPending={isPending} />
 
         {allBooks.length > 0 && (
           <div className="flex items-center justify-between pt-2">

@@ -1,33 +1,26 @@
-import { useEffect, useState } from 'react';
-import { getSession, setSession, type Session } from '@/data/session';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { User } from '@/data/types';
 
+async function fetchMe(): Promise<User | null> {
+  const res = await fetch('/api/auth/me');
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export function useSession() {
-  const [session, _setSession] = useState<Session>(getSession);
+  const queryClient = useQueryClient();
+  const { data: user = null } = useQuery({
+    queryKey: ['session'],
+    queryFn: fetchMe,
+    staleTime: Infinity,
+    retry: false,
+  });
 
-  useEffect(() => {
-    // subscribe to external changes (e.g. DevToolbar)
-    let current = true;
-    const interval = setInterval(() => {
-      if (!current) return;
-      const s = getSession();
-      _setSession((prev) => (prev === s ? prev : s));
-    }, 100);
-    return () => {
-      current = false;
-      clearInterval(interval);
-    };
-  }, []);
-
-  const login = (user: User) => {
-    setSession({ user });
-    _setSession({ user });
+  const logout = async () => {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    queryClient.setQueryData(['session'], null);
+    queryClient.invalidateQueries({ queryKey: ['session'] });
   };
 
-  const logout = () => {
-    setSession({ user: null });
-    _setSession({ user: null });
-  };
-
-  return { session, login, logout };
+  return { user, logout };
 }

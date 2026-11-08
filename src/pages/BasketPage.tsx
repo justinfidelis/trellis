@@ -37,6 +37,7 @@ interface FormErrors {
 export function BasketPage() {
   const { items, atLimit, removeItem, clearItems } = useBasket();
   const copies = useCopiesWithBooks(items);
+  const copyList = copies.data ?? [];
 
   const [name, setName] = useState('');
   const [telegram, setTelegram] = useState('');
@@ -46,14 +47,14 @@ export function BasketPage() {
 
   const ownerGroups = useMemo(() => {
     const map = new Map<string, { ownerName: string; books: CopyWithBook[] }>();
-    for (const copy of copies) {
+    for (const copy of copyList) {
       if (!map.has(copy.owner_id)) {
         map.set(copy.owner_id, { ownerName: copy.owner_name, books: [] });
       }
       map.get(copy.owner_id)!.books.push(copy);
     }
     return Array.from(map.values());
-  }, [copies]);
+  }, [copyList]);
 
   function handleCheckout() {
     const newErrors: FormErrors = {};
@@ -73,12 +74,12 @@ export function BasketPage() {
           <div className="flex items-baseline gap-2">
             <h1 className="text-2xl font-semibold tracking-tight">My Basket</h1>
             <span className={`text-sm font-medium ${atLimit ? 'text-amber-500' : 'text-muted-foreground'}`}>
-              {copies.length} / {BASKET_LIMIT}
+              {copyList.length} / {BASKET_LIMIT}
             </span>
           </div>
         </div>
 
-        {copies.length === 0 ? (
+        {copyList.length === 0 ? (
           <div className="flex flex-col items-center gap-4 py-20 text-center">
             <ShoppingBasket className="h-10 w-10 text-muted-foreground/40" />
             <div className="space-y-1">
