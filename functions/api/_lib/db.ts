@@ -19,7 +19,7 @@ export async function getUserById(db: D1Database, id: string) {
 }
 
 export async function getAllLenders(db: D1Database) {
-  return (await db.prepare("SELECT * FROM users ORDER BY created_at ASC").all()).results;
+  return (await db.prepare("SELECT * FROM users WHERE role = 'lender' ORDER BY created_at ASC").all()).results;
 }
 
 export async function createUser(db: D1Database, user: { email: string; name: string; tele_handle: string; role: string }) {

@@ -30,6 +30,10 @@ export async function onRequest(context: AppContext) {
     return error(`Cannot transition from ${req.status} to ${body.status}`);
   }
 
+  if (body.status === 'on_loan' && !body.copy_id) {
+    return error('copy_id is required when marking a request as on_loan');
+  }
+
   const now = new Date().toISOString();
   const update: Parameters<typeof updateRequest>[2] = { status: body.status };
 
