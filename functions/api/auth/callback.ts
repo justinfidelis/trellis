@@ -57,12 +57,9 @@ export async function onRequest(context: EventContext<Env, string, Record<string
   const sessionId = await createSession(context.env.DB, user.id);
   const isSecure = url.protocol === 'https:';
 
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: '/lender/books',
-      // Set both session cookie and clear the state cookie in one response
-      'Set-Cookie': [setSessionCookie(sessionId, isSecure), clearStateCookie].join(', '),
-    },
-  });
+  const headers = new Headers({ Location: '/lender/books' });
+  headers.append('Set-Cookie', setSessionCookie(sessionId, isSecure));
+  headers.append('Set-Cookie', clearStateCookie);
+
+  return new Response(null, { status: 302, headers });
 }

@@ -8,7 +8,7 @@ import { BasketDropdown } from '@/components/basket/BasketDropdown';
 import { Sprout, Search, ShoppingBasket } from 'lucide-react';
 
 export function NavBar() {
-  const { session, logout } = useSession();
+  const { user, logout } = useSession();
   const { count, atLimit } = useBasket();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -57,9 +57,9 @@ export function NavBar() {
             </button>
             {basketOpen && <BasketDropdown onClose={() => setBasketOpen(false)} />}
           </div>
-          {session.user ? (
+          {user ? (
             <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground hidden sm:block">{session.user.name}</span>
+              <span className="text-sm text-muted-foreground hidden sm:block">{user.name}</span>
               <Button variant="outline" size="sm" onClick={logout}>Sign out</Button>
             </div>
           ) : (
