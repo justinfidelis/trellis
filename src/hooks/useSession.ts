@@ -9,7 +9,7 @@ async function fetchMe(): Promise<User | null> {
 
 export function useSession() {
   const queryClient = useQueryClient();
-  const { data: user = null } = useQuery({
+  const { data: user = null, isLoading } = useQuery({
     queryKey: ['session'],
     queryFn: fetchMe,
     staleTime: Infinity,
@@ -22,5 +22,5 @@ export function useSession() {
     queryClient.invalidateQueries({ queryKey: ['session'] });
   };
 
-  return { user, logout };
+  return { user, isLoading, logout };
 }
