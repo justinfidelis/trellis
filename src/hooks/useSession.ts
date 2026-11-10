@@ -1,7 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { User } from '@/data/types';
+import { mockUsers } from '@/data/mock';
+
+// DEV ONLY — remove before merging
+const DEV_USER = mockUsers.find((u) => u.role === 'admin')!;
 
 async function fetchMe(): Promise<User | null> {
+  if (import.meta.env.DEV) return DEV_USER;
   const res = await fetch('/api/auth/me');
   if (!res.ok) return null;
   return res.json();

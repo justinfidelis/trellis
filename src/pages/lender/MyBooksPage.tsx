@@ -1,15 +1,21 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpDown, ArrowUp, ArrowDown, BookOpen, ListFilter } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, BookOpen, ListFilter, Search, Plus, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { CoverImage } from '@/components/books/CoverImage';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PageShell } from '@/components/layout/PageShell';
 import { mockBooks, mockCopies, mockRequests } from '@/data/mock';
-import type { CopyStatus, Request } from '@/data/types';
+import type { CopyStatus, RequestStatus, Request, Copy, Book } from '@/data/types';
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50];
+const DEFAULT_PER_PAGE = 25;
 
 const MOCK_LENDER_ID = 'u1';
 
@@ -128,18 +134,18 @@ function TeleHandle({ handle }: { handle: string }) {
   function handleClick() {
     navigator.clipboard.writeText(handle);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1000);
   }
 
   return (
-    <Tooltip>
+    <Tooltip open={copied} onOpenChange={() => {}}>
       <TooltipTrigger
         onClick={handleClick}
-        className="text-sm text-muted-foreground cursor-copy hover:text-foreground transition-colors"
+        className="text-sm text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
       >
         @{handle}
       </TooltipTrigger>
-      <TooltipContent>{copied ? 'Copied' : 'Copy'}</TooltipContent>
+      <TooltipContent>Copied</TooltipContent>
     </Tooltip>
   );
 }
@@ -164,10 +170,16 @@ function QueuePopover({ queue }: { queue: Request[] }) {
   );
 }
 
+type BookRow = { copy: Copy; book: Book; primary: Request | null; queue: Request[] };
+
 export function MyBooksPage() {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [statusFilter, setStatusFilter] = useState<Set<CopyStatus>>(new Set(ALL_STATUSES));
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
+  const [allRows, setAllRows] = useState<BookRow[]>(() => buildRows());
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -182,10 +194,56 @@ export function MyBooksPage() {
     }
   }
 
-  const allRows = useMemo(() => buildRows(), []);
+  function handleSearch(value: string) {
+    setSearch(value);
+    setPage(1);
+  }
 
-  const rows = useMemo(() => {
-    const filtered = allRows.filter((r) => statusFilter.has(r.copy.status));
+  function handleStatusFilter(next: Set<CopyStatus>) {
+    setStatusFilter(next);
+    setPage(1);
+  }
+
+  function handlePerPage(size: number) {
+    setPerPage(size);
+    setPage(1);
+  }
+
+  function handleStatusAction(copyId: string, action: 'return' | 'hand_off' | 'disable' | 'enable') {
+    setAllRows(prev => prev.map(row => {
+      if (row.copy.id !== copyId) return row;
+      switch (action) {
+        case 'return': {
+          const hasQueue = row.queue.length > 0;
+          const newPrimary = hasQueue ? { ...row.queue[0], status: 'ready' as RequestStatus } : null;
+          return {
+            ...row,
+            copy: { ...row.copy, status: (hasQueue ? 'reserved' : 'available') as CopyStatus },
+            primary: newPrimary,
+            queue: hasQueue ? row.queue.slice(1) : [],
+          };
+        }
+        case 'hand_off':
+          return {
+            ...row,
+            copy: { ...row.copy, status: 'on_loan' as CopyStatus },
+            primary: row.primary ? { ...row.primary, status: 'on_loan' as RequestStatus } : row.primary,
+          };
+        case 'disable':
+          return { ...row, copy: { ...row.copy, status: 'unavailable' as CopyStatus } };
+        case 'enable':
+          return { ...row, copy: { ...row.copy, status: 'available' as CopyStatus } };
+      }
+    }));
+  }
+
+  const filteredRows = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    const filtered = allRows.filter((r) => {
+      if (!statusFilter.has(r.copy.status)) return false;
+      if (q && !r.book.title.toLowerCase().includes(q) && !r.book.author.toLowerCase().includes(q) && !(r.primary?.borrower_name ?? '').toLowerCase().includes(q) && !(r.primary?.borrower_tele ?? '').toLowerCase().includes(q)) return false;
+      return true;
+    });
     return [...filtered].sort((a, b) => {
       if (sortKey === null) {
         // TODO(backend): default ordering (reserved → on_loan → available → unavailable,
@@ -200,68 +258,165 @@ export function MyBooksPage() {
       else if (sortKey === 'author') cmp = a.book.author.localeCompare(b.book.author);
       return sortDir === 'asc' ? cmp : -cmp;
     });
-  }, [allRows, sortKey, sortDir, statusFilter]);
+  }, [allRows, sortKey, sortDir, statusFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / perPage));
+  const currentPage = Math.min(page, totalPages);
+  const rows = filteredRows.slice((currentPage - 1) * perPage, currentPage * perPage);
 
   return (
     <PageShell>
       <TooltipProvider>
         <div className="space-y-6">
-          <div className="space-y-0.5">
-            <h1 className="text-2xl font-semibold tracking-tight">My Books</h1>
-            <p className="text-sm text-muted-foreground">{allRows.length} {allRows.length === 1 ? 'book' : 'books'} in your library</p>
+          <div className="flex items-start gap-4">
+            <div className="space-y-0.5 shrink-0">
+              <h1 className="text-2xl font-semibold tracking-tight">My Books</h1>
+              <p className="text-sm text-muted-foreground">{allRows.length} {allRows.length === 1 ? 'book' : 'books'} in your library</p>
+            </div>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground pointer-events-none" />
+              <Input
+                placeholder="Search by title, author, requester…"
+                value={search}
+                onChange={(e) => handleSearch(e.target.value)}
+                className="pl-9 w-72"
+              />
+            </div>
+            <Button className="shrink-0 ml-auto">
+              <Plus className="size-4" />
+              Add Book
+            </Button>
           </div>
 
           {rows.length === 0 ? (
             <div className="flex flex-col items-center gap-4 py-20 text-center">
               <BookOpen className="h-10 w-10 text-muted-foreground/40" />
               <div className="space-y-1">
-                <p className="font-medium">No books yet</p>
-                <p className="text-sm text-muted-foreground">Your lending library is empty.</p>
+                <p className="font-medium">{search ? 'No results found' : 'No books yet'}</p>
+                <p className="text-sm text-muted-foreground">
+                  {search ? 'Try a different search term.' : 'Your lending library is empty.'}
+                </p>
               </div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-14" />
-                  <SortableHead label="Title"  sortKey="title"  activeKey={sortKey} dir={sortDir} onSort={handleSort} className="w-full" />
-                  <SortableHead label="Author" sortKey="author" activeKey={sortKey} dir={sortDir} onSort={handleSort} className="min-w-36" />
-                  <StatusFilterHead filter={statusFilter} onChange={setStatusFilter} />
-                  <TableHead className="min-w-36 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requester</TableHead>
-                  <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Telegram</TableHead>
-                  <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requested</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rows.map(({ copy, book, primary, queue }) => {
-                  const { label, className } = statusConfig[copy.status];
-                  return (
-                    <TableRow key={copy.id}>
-                      <TableCell className="py-2">
-                        <Link to={`/book/${copy.id}`} className="block w-10 aspect-[2/3] rounded overflow-hidden bg-muted">
-                          <CoverImage src={book.cover_url} title={book.title} iconClassName="w-4 h-4" />
-                        </Link>
-                      </TableCell>
-                      <TableCell>
-                        <Link to={`/book/${copy.id}`} className="text-sm font-medium hover:underline line-clamp-1">
-                          {book.title}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{book.author}</TableCell>
-                      <TableCell>
-                        <div className="flex flex-col items-start gap-1">
-                          <Badge variant="secondary" className={className}>{label}</Badge>
-                          {queue.length > 0 && <QueuePopover queue={queue} />}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-sm">{primary?.borrower_name}</TableCell>
-                      <TableCell>{primary && <TeleHandle handle={primary.borrower_tele} />}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{primary && formatDate(primary.requested_at)}</TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-14" />
+                    <SortableHead label="Title"  sortKey="title"  activeKey={sortKey} dir={sortDir} onSort={handleSort} className="w-full" />
+                    <SortableHead label="Author" sortKey="author" activeKey={sortKey} dir={sortDir} onSort={handleSort} className="min-w-36" />
+                    <StatusFilterHead filter={statusFilter} onChange={handleStatusFilter} />
+                    <TableHead className="min-w-36 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requester</TableHead>
+                    <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Telegram</TableHead>
+                    <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requested</TableHead>
+                    <TableHead className="w-12" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.map(({ copy, book, primary, queue }) => {
+                    const { label, className } = statusConfig[copy.status];
+                    return (
+                      <TableRow key={copy.id}>
+                        <TableCell className="py-2">
+                          <Link to={`/book/${copy.id}`} className="block w-10 aspect-[2/3] rounded overflow-hidden bg-muted">
+                            <CoverImage src={book.cover_url} title={book.title} iconClassName="w-4 h-4" />
+                          </Link>
+                        </TableCell>
+                        <TableCell>
+                          <Link to={`/book/${copy.id}`} className="text-sm font-medium hover:underline line-clamp-1">
+                            {book.title}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{book.author}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-col items-start gap-1">
+                            <Badge variant="secondary" className={className}>{label}</Badge>
+                            {queue.length > 0 && <QueuePopover queue={queue} />}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">{primary?.borrower_name}</TableCell>
+                        <TableCell>{primary && <TeleHandle handle={primary.borrower_tele} />}</TableCell>
+                        <TableCell className="text-sm text-muted-foreground">{primary && formatDate(primary.requested_at)}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger className="flex size-8 items-center justify-center rounded-md hover:bg-accent transition-colors">
+                              <MoreHorizontal className="size-4" />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-auto">
+                              {copy.status === 'on_loan' && (() => {
+                                const target = queue.length > 0 ? 'reserved' : 'available';
+                                return (
+                                  <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'return')}>
+                                    Set status to <Badge variant="secondary" className={statusConfig[target].className}>{statusConfig[target].label}</Badge>
+                                  </DropdownMenuItem>
+                                );
+                              })()}
+                              {copy.status === 'reserved' && (
+                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'hand_off')}>
+                                  Set status to <Badge variant="secondary" className={statusConfig['on_loan'].className}>{statusConfig['on_loan'].label}</Badge>
+                                </DropdownMenuItem>
+                              )}
+                              {copy.status === 'available' && (
+                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'disable')}>
+                                  Set status to <Badge variant="secondary" className={statusConfig['unavailable'].className}>{statusConfig['unavailable'].label}</Badge>
+                                </DropdownMenuItem>
+                              )}
+                              {copy.status === 'unavailable' && (
+                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'enable')}>
+                                  Set status to <Badge variant="secondary" className={statusConfig['available'].className}>{statusConfig['available'].label}</Badge>
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+
+              {filteredRows.length > 0 && (
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>Per page</span>
+                    <Select value={String(perPage)} onValueChange={(v) => handlePerPage(Number(v))}>
+                      <SelectTrigger className="w-20 h-8">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PAGE_SIZE_OPTIONS.map((n) => (
+                          <SelectItem key={n} value={String(n)}>{n}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <span className="text-xs">
+                      {(currentPage - 1) * perPage + 1}–{Math.min(currentPage * perPage, filteredRows.length)} of {filteredRows.length}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft />
+                    </Button>
+                    <span className="text-sm px-3">{currentPage} / {totalPages}</span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                    >
+                      <ChevronRight />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </TooltipProvider>
