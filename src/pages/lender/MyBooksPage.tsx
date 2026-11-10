@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpDown, ArrowUp, ArrowDown, BookOpen, ListFilter, Search, Plus, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown, BookOpen, ListFilter, Search, Plus, ChevronLeft, ChevronRight, Pencil, Loader2 } from 'lucide-react';
 import { CoverImage } from '@/components/books/CoverImage';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -180,6 +180,7 @@ export function MyBooksPage() {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [allRows, setAllRows] = useState<BookRow[]>(() => buildRows());
+  const [loadingCopyId, setLoadingCopyId] = useState<string | null>(null);
 
   function handleSort(key: SortKey) {
     if (key === sortKey) {
@@ -209,32 +210,40 @@ export function MyBooksPage() {
     setPage(1);
   }
 
-  function handleStatusAction(copyId: string, action: 'return' | 'hand_off' | 'disable' | 'enable') {
-    setAllRows(prev => prev.map(row => {
-      if (row.copy.id !== copyId) return row;
-      switch (action) {
-        case 'return': {
-          const hasQueue = row.queue.length > 0;
-          const newPrimary = hasQueue ? { ...row.queue[0], status: 'ready' as RequestStatus } : null;
-          return {
-            ...row,
-            copy: { ...row.copy, status: (hasQueue ? 'reserved' : 'available') as CopyStatus },
-            primary: newPrimary,
-            queue: hasQueue ? row.queue.slice(1) : [],
-          };
+  async function handleStatusAction(copyId: string, action: 'return' | 'hand_off' | 'disable' | 'enable') {
+    setLoadingCopyId(copyId);
+    try {
+      // TODO(backend): replace the optimistic update below with an API call, e.g.:
+      // await api.patch(`/copies/${copyId}/status`, { action });
+      // then re-fetch or update from the response.
+      setAllRows(prev => prev.map(row => {
+        if (row.copy.id !== copyId) return row;
+        switch (action) {
+          case 'return': {
+            const hasQueue = row.queue.length > 0;
+            const newPrimary = hasQueue ? { ...row.queue[0], status: 'ready' as RequestStatus } : null;
+            return {
+              ...row,
+              copy: { ...row.copy, status: (hasQueue ? 'reserved' : 'available') as CopyStatus },
+              primary: newPrimary,
+              queue: hasQueue ? row.queue.slice(1) : [],
+            };
+          }
+          case 'hand_off':
+            return {
+              ...row,
+              copy: { ...row.copy, status: 'on_loan' as CopyStatus },
+              primary: row.primary ? { ...row.primary, status: 'on_loan' as RequestStatus } : row.primary,
+            };
+          case 'disable':
+            return { ...row, copy: { ...row.copy, status: 'unavailable' as CopyStatus } };
+          case 'enable':
+            return { ...row, copy: { ...row.copy, status: 'available' as CopyStatus } };
         }
-        case 'hand_off':
-          return {
-            ...row,
-            copy: { ...row.copy, status: 'on_loan' as CopyStatus },
-            primary: row.primary ? { ...row.primary, status: 'on_loan' as RequestStatus } : row.primary,
-          };
-        case 'disable':
-          return { ...row, copy: { ...row.copy, status: 'unavailable' as CopyStatus } };
-        case 'enable':
-          return { ...row, copy: { ...row.copy, status: 'available' as CopyStatus } };
-      }
-    }));
+      }));
+    } finally {
+      setLoadingCopyId(null);
+    }
   }
 
   const filteredRows = useMemo(() => {
@@ -310,14 +319,13 @@ export function MyBooksPage() {
                     <TableHead className="min-w-36 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requester</TableHead>
                     <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Telegram</TableHead>
                     <TableHead className="min-w-32 text-xs font-medium uppercase tracking-wide text-muted-foreground">Requested</TableHead>
-                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {rows.map(({ copy, book, primary, queue }) => {
                     const { label, className } = statusConfig[copy.status];
                     return (
-                      <TableRow key={copy.id}>
+                      <TableRow key={copy.id} className="group">
                         <TableCell className="py-2">
                           <Link to={`/book/${copy.id}`} className="block w-10 aspect-[2/3] rounded overflow-hidden bg-muted">
                             <CoverImage src={book.cover_url} title={book.title} iconClassName="w-4 h-4" />
@@ -330,46 +338,52 @@ export function MyBooksPage() {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">{book.author}</TableCell>
                         <TableCell>
-                          <div className="flex flex-col items-start gap-1">
+                          <div className="flex items-center gap-1">
                             <Badge variant="secondary" className={className}>{label}</Badge>
+                            {loadingCopyId === copy.id ? (
+                              <Loader2 className="size-3.5 animate-spin text-muted-foreground" />
+                            ) : (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 flex size-5 items-center justify-center rounded text-muted-foreground hover:text-foreground transition-colors">
+                                  <Pencil className="size-3" />
+                                </DropdownMenuTrigger>
+                              <DropdownMenuContent align="start" className="w-auto">
+                                {copy.status === 'on_loan' && (() => {
+                                  const target = queue.length > 0 ? 'reserved' : 'available';
+                                  return (
+                                    <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'return')}>
+                                      Set status to <Badge variant="secondary" className={statusConfig[target].className}>{statusConfig[target].label}</Badge>
+                                    </DropdownMenuItem>
+                                  );
+                                })()}
+                                {copy.status === 'reserved' && (
+                                  <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'hand_off')}>
+                                    Set status to <Badge variant="secondary" className={statusConfig['on_loan'].className}>{statusConfig['on_loan'].label}</Badge>
+                                  </DropdownMenuItem>
+                                )}
+                                {copy.status === 'available' && (
+                                  <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'disable')}>
+                                    Set status to <Badge variant="secondary" className={statusConfig['unavailable'].className}>{statusConfig['unavailable'].label}</Badge>
+                                  </DropdownMenuItem>
+                                )}
+                                {copy.status === 'unavailable' && (
+                                  <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'enable')}>
+                                    Set status to <Badge variant="secondary" className={statusConfig['available'].className}>{statusConfig['available'].label}</Badge>
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm">
+                          <div className="flex flex-col items-start gap-1">
+                            <span>{primary?.borrower_name}</span>
                             {queue.length > 0 && <QueuePopover queue={queue} />}
                           </div>
                         </TableCell>
-                        <TableCell className="text-sm">{primary?.borrower_name}</TableCell>
                         <TableCell>{primary && <TeleHandle handle={primary.borrower_tele} />}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{primary && formatDate(primary.requested_at)}</TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger className="flex size-8 items-center justify-center rounded-md hover:bg-accent transition-colors">
-                              <MoreHorizontal className="size-4" />
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-auto">
-                              {copy.status === 'on_loan' && (() => {
-                                const target = queue.length > 0 ? 'reserved' : 'available';
-                                return (
-                                  <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'return')}>
-                                    Set status to <Badge variant="secondary" className={statusConfig[target].className}>{statusConfig[target].label}</Badge>
-                                  </DropdownMenuItem>
-                                );
-                              })()}
-                              {copy.status === 'reserved' && (
-                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'hand_off')}>
-                                  Set status to <Badge variant="secondary" className={statusConfig['on_loan'].className}>{statusConfig['on_loan'].label}</Badge>
-                                </DropdownMenuItem>
-                              )}
-                              {copy.status === 'available' && (
-                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'disable')}>
-                                  Set status to <Badge variant="secondary" className={statusConfig['unavailable'].className}>{statusConfig['unavailable'].label}</Badge>
-                                </DropdownMenuItem>
-                              )}
-                              {copy.status === 'unavailable' && (
-                                <DropdownMenuItem onClick={() => handleStatusAction(copy.id, 'enable')}>
-                                  Set status to <Badge variant="secondary" className={statusConfig['available'].className}>{statusConfig['available'].label}</Badge>
-                                </DropdownMenuItem>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
                       </TableRow>
                     );
                   })}
