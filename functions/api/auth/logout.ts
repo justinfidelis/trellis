@@ -1,5 +1,5 @@
 import { clearSessionCookie, deleteSession, getSessionCookie } from '../_lib/auth';
-import { json, methodNotAllowed } from '../_lib/response';
+import { methodNotAllowed } from '../_lib/response';
 import type { Env } from '../_lib/types';
 
 export async function onRequest(context: EventContext<Env, string, Record<string, unknown>>) {

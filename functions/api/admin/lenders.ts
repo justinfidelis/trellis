@@ -1,4 +1,4 @@
-import { createUser, deleteUser, getAllLenders } from '../_lib/db';
+import { createUser, getAllLenders } from '../_lib/db';
 import { error, json, methodNotAllowed } from '../_lib/response';
 import type { AppContext } from '../_lib/types';
 

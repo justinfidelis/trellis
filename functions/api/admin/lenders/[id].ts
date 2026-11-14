@@ -1,5 +1,5 @@
 import { deleteUser, getUserById } from '../../_lib/db';
-import { error, forbidden, json, methodNotAllowed, notFound } from '../../_lib/response';
+import { forbidden, json, methodNotAllowed, notFound } from '../../_lib/response';
 import type { AppContext } from '../../_lib/types';
 
 export async function onRequest(context: AppContext) {
