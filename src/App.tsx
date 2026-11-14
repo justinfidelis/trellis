@@ -6,12 +6,12 @@ import { BrowsePage } from '@/pages/BrowsePage';
 import { BookDetailsPage } from '@/pages/BookDetailsPage';
 import { BasketPage } from '@/pages/BasketPage';
 import { LoginPage } from '@/pages/LoginPage';
-import { AccountPage } from '@/pages/AccountPage';
-import { MyBooksPage } from '@/pages/lender/MyBooksPage';
-import { AddBooksLayout } from '@/pages/lender/AddBooksLayout';
-import { AddBooksInputPage } from '@/pages/lender/AddBooksInputPage';
-import { AddBooksReviewPage } from '@/pages/lender/AddBooksReviewPage';
-import { LendersPage } from '@/pages/admin/LendersPage';
+import { MyBooksPage } from '@/pages/dashboard/MyBooksPage';
+import { AddBooksLayout } from '@/pages/dashboard/books-add/Layout';
+import { AddBooksInputPage } from '@/pages/dashboard/books-add/InputPage';
+import { AddBooksReviewPage } from '@/pages/dashboard/books-add/ReviewPage';
+import { AdminPage } from '@/pages/dashboard/AdminPage';
+import { AccountPage } from '@/pages/dashboard/AccountPage';
 import { BasketProvider } from '@/context/BasketContext';
 
 function NotFound() {
@@ -40,7 +40,7 @@ export default function App() {
                 <Route path="review/:index" element={<AddBooksReviewPage />} />
               </Route>
               <Route path="/dashboard/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
-              <Route path="/dashboard/admin" element={<RequireAuth role="admin"><LendersPage /></RequireAuth>} />
+              <Route path="/dashboard/admin" element={<RequireAuth role="admin"><AdminPage /></RequireAuth>} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>
