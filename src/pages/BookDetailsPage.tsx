@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { ChevronRight, MessageSquare, ShoppingBasket } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
 import { CoverImage } from '@/components/books/CoverImage';
+import { CoverZoom } from '@/components/books/CoverZoom';
 import { StatusBadge } from '@/components/requests/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { useCopyWithBook } from '@/hooks/useBooks';
@@ -67,7 +68,11 @@ export function BookDetailsPage() {
 
         <div className="flex flex-col sm:flex-row gap-8 items-start">
           <div className="w-44 shrink-0 mx-auto sm:mx-0 aspect-[2/3] rounded-lg overflow-hidden bg-muted">
-            <CoverImage src={item.cover_url} title={item.title} />
+            {item.cover_url ? (
+              <CoverZoom src={item.cover_url} title={item.title} />
+            ) : (
+              <CoverImage src={null} title={item.title} />
+            )}
           </div>
 
           <div className="space-y-4 min-w-0 flex-1">

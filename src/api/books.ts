@@ -25,10 +25,15 @@ export async function getBookSearchResult(isbn: string): Promise<GetBookResult> 
 }
 
 export async function uploadCoverImage(file: File): Promise<string> {
-  // TODO(backend): POST /api/uploads/cover (multipart/form-data)
-  // Returns { url: "https://trellis-covers.s3.amazonaws.com/..." }
-  await new Promise<void>((r) => setTimeout(r, 600));
-  return URL.createObjectURL(file);
+  const form = new FormData();
+  form.append('file', file);
+  const res = await fetch('/api/uploads/cover', { method: 'POST', body: form });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as { error?: string };
+    throw new Error(body.error ?? 'Failed to upload image');
+  }
+  const data = await res.json() as { url: string };
+  return data.url;
 }
 
 export async function saveBookCopy(draft: {

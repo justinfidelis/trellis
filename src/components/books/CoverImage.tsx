@@ -13,7 +13,7 @@ export function CoverImage({ src, title, className = '', iconClassName = 'w-10 h
       <img
         src={src}
         alt={`Cover of ${title}`}
-        className={`object-cover w-full h-full ${className}`}
+        className={`object-contain w-full h-full ${className}`}
       />
     );
   }
