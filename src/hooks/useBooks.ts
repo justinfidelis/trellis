@@ -1,8 +1,20 @@
 import { useQuery } from '@tanstack/react-query';
 import { GENRES, subtreeIds } from '@/lib/constants';
-import type { Book, Copy, Genre } from '@/data/types';
+import type { Copy, Genre } from '@/data/types';
 
-export type CopyWithBook = Omit<Book, 'id' | 'created_at'> & Copy & { owner_name: string };
+// Browse/detail rows: a copy plus its owner's display name.
+export type CopyWithBook = Copy & { owner_name: string };
+
+export function useLenderBooks() {
+  return useQuery({
+    queryKey: ['lender-books'],
+    queryFn: async (): Promise<Copy[]> => {
+      const res = await fetch('/api/lender/books');
+      if (!res.ok) throw new Error('Failed to fetch books');
+      return res.json() as Promise<Copy[]>;
+    },
+  });
+}
 
 async function fetchBooks(query: string, genrePath: string, availableOnly: boolean): Promise<CopyWithBook[]> {
   const params = new URLSearchParams();

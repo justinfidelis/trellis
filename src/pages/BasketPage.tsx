@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBasket, X } from 'lucide-react';
 import { PageShell } from '@/components/layout/PageShell';
@@ -36,8 +36,14 @@ interface FormErrors {
 
 export function BasketPage() {
   const { items, atLimit, removeItem, clearItems } = useBasket();
-  const copies = useCopiesWithBooks(items);
-  const copyList = copies.data ?? [];
+  const { data: copyList = [], isSuccess } = useCopiesWithBooks(items);
+
+  // Revalidate on load: drop basket items whose copy no longer exists (deleted).
+  useEffect(() => {
+    if (!isSuccess) return;
+    const live = new Set(copyList.map((c) => c.id));
+    items.filter((id) => !live.has(id)).forEach(removeItem);
+  }, [isSuccess, copyList, items, removeItem]);
 
   const [name, setName] = useState('');
   const [telegram, setTelegram] = useState('');

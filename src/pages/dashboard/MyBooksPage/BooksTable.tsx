@@ -9,11 +9,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { CopyStatus, Request, Copy, Book } from '@/data/types';
+import type { CopyStatus, Request, Copy } from '@/data/types';
 
 export type SortKey = 'title' | 'author';
 export type SortDir = 'asc' | 'desc';
-export type BookRow = { copy: Copy; book: Book; primary: Request | null; queue: Request[] };
+export type BookRow = { copy: Copy; primary: Request | null; queue: Request[] };
 
 const statusConfig: Record<CopyStatus, { label: string; className?: string }> = {
   available:   { label: 'Available',   className: 'bg-lime-600/10 text-lime-700 dark:text-lime-400' },
@@ -180,21 +180,21 @@ export function BooksTable({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map(({ copy, book, primary, queue }) => {
+            {rows.map(({ copy, primary, queue }) => {
               const { label, className } = statusConfig[copy.status];
               return (
                 <TableRow key={copy.id} className="group">
                   <TableCell className="py-2">
                     <Link to={`/book/${copy.id}`} className="block w-10 aspect-[2/3] rounded overflow-hidden bg-muted">
-                      <CoverImage src={book.cover_url} title={book.title} iconClassName="w-4 h-4" />
+                      <CoverImage src={copy.cover_url} title={copy.title} iconClassName="w-4 h-4" />
                     </Link>
                   </TableCell>
                   <TableCell>
                     <Link to={`/book/${copy.id}`} className="text-sm font-medium hover:underline line-clamp-1">
-                      {book.title}
+                      {copy.title}
                     </Link>
                   </TableCell>
-                  <TableCell className="text-sm text-muted-foreground">{book.author}</TableCell>
+                  <TableCell className="text-sm text-muted-foreground">{copy.author}</TableCell>
                   <TableCell>
                     <div className="flex items-center gap-1">
                       <Badge variant="secondary" className={className}>{label}</Badge>

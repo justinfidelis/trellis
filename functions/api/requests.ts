@@ -1,5 +1,5 @@
 import {
-  createRequest, getActiveRequestCountForBorrower, getCopyWithBook,
+  createRequest, getActiveRequestCountForBorrower, getCopyWithOwner,
   getRequestsByLender, getSetting, getUserById, isValidPasscode,
 } from './_lib/db';
 import { error, json, methodNotAllowed, unauthorized } from './_lib/response';
@@ -32,7 +32,7 @@ export async function onRequest(context: AppContext) {
     const valid = await isValidPasscode(context.env.DB, body.passcode);
     if (!valid) return error('Invalid passcode', 403);
 
-    const copy = await getCopyWithBook(context.env.DB, body.copy_id) as { status: string; owner_id: string; id: string; copy_id: string; title: string } | null;
+    const copy = await getCopyWithOwner(context.env.DB, body.copy_id) as { status: string; owner_id: string; id: string; title: string } | null;
     if (!copy) return error('Copy not found', 404);
     if (copy.status === 'unavailable') return error('This book is not available for requests', 400);
 
@@ -46,7 +46,7 @@ export async function onRequest(context: AppContext) {
     }
 
     const requestId = await createRequest(context.env.DB, {
-      book_id: copy.id,
+      copy_id: copy.id,
       lender_id: copy.owner_id,
       borrower_name: body.borrower_name,
       borrower_tele: body.borrower_tele,

@@ -26,7 +26,26 @@ export function useUpdateRequest() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['lender-requests'] });
+      queryClient.invalidateQueries({ queryKey: ['lender-books'] });
       queryClient.invalidateQueries({ queryKey: ['books'] });
+    },
+  });
+}
+
+export function useUpdateCopyStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, status }: { id: string; status: string }) => {
+      const res = await fetch(`/api/copies/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (!res.ok) throw new Error('Failed to update copy status');
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lender-books'] });
     },
   });
 }

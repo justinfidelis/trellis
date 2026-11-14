@@ -1,5 +1,5 @@
 import {
-  getBookById, getNextInQueue, getRequestById, getUserById,
+  getCopyById, getNextInQueue, getRequestById, getUserById,
   updateCopy, updateRequest,
 } from '../_lib/db';
 import { error, forbidden, json, methodNotAllowed, notFound, unauthorized } from '../_lib/response';
@@ -45,20 +45,20 @@ export async function onRequest(context: AppContext) {
 
   // When marking returned: free the copy, advance queue
   if (body.status === 'returned' && req.copy_id) {
-    const next = await getNextInQueue(context.env.DB, req.book_id, req.lender_id);
+    const next = await getNextInQueue(context.env.DB, req.copy_id);
     if (next) {
       await updateRequest(context.env.DB, next.id, { status: 'ready', ready_at: now });
       await updateCopy(context.env.DB, req.copy_id, { status: 'reserved' });
 
       const lender = await getUserById(context.env.DB, req.lender_id);
       if (lender?.tele_handle) {
-        const book = await getBookById(context.env.DB, req.book_id);
+        const copy = await getCopyById(context.env.DB, req.copy_id);
         context.waitUntil(
           sendTelegramMessage(
             context.env.BOT_TOKEN,
             lender.tele_handle,
             queueAdvancedNotificationText({
-              bookTitle: (book as { title?: string } | null)?.title ?? req.book_id,
+              bookTitle: copy?.title ?? req.copy_id,
               borrowerName: next.borrower_name,
               borrowerTele: next.borrower_tele,
             })

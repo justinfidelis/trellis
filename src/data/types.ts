@@ -18,7 +18,10 @@ export interface User {
   created_at: string;
 }
 
-export interface Book {
+// A copy is a self-contained listing: one physical item a lender offers, carrying
+// its own metadata snapshot (title/author/genre/etc.). There is no shared "book"
+// entity — bibliographic data from Open Library lives only in the server-side cache.
+export interface Copy {
   id: string;
   isbn: string | null;
   title: string;
@@ -26,12 +29,6 @@ export interface Book {
   genre_id: string;
   description: string | null;
   cover_url: string | null;
-  created_at: string;
-}
-
-export interface Copy {
-  id: string;
-  book_id: string;
   owner_id: string;
   owner_notes: string | null;
   status: CopyStatus;
@@ -40,9 +37,8 @@ export interface Copy {
 
 export interface Request {
   id: string;
-  book_id: string;
+  copy_id: string;
   lender_id: string;
-  copy_id: string | null;
   borrower_name: string;
   borrower_tele: string;
   status: RequestStatus;
