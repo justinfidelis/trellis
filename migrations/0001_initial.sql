@@ -96,41 +96,39 @@ CREATE INDEX idx_sessions_user    ON sessions(user_id);
 CREATE INDEX idx_sessions_expires ON sessions(expires_at);
 CREATE INDEX idx_passcodes_active ON passcodes(active);
 
--- Seed: genre tree (mirrors GENRES in src/lib/constants.ts)
+-- Seed: genre tree (mirrors GENRES in src/lib/constants.ts; see docs/genre_list.md)
 INSERT INTO genres (id, name, parent_id, path) VALUES
   ('FIC000000', 'Fiction',                      NULL,        'fiction'),
   ('FIC019000', 'Literary Fiction',             'FIC000000', 'fiction/literary'),
-  ('FIC010000', 'Contemporary Fiction',         'FIC000000', 'fiction/contemporary'),
+  ('FIC014110', 'Contemporary Fiction',         'FIC000000', 'fiction/contemporary'),
   ('FIC014000', 'Historical Fiction',           'FIC000000', 'fiction/historical'),
   ('FIC009000', 'Fantasy',                      'FIC000000', 'fiction/fantasy'),
   ('FIC028000', 'Science Fiction',              'FIC000000', 'fiction/sci-fi'),
-  ('FIC060000', 'Christian',                    'FIC000000', 'fiction/christian'),
+  ('FIC042000', 'Christian',                    'FIC000000', 'fiction/christian'),
   ('NON000000', 'Non Fiction',                  NULL,        'non-fiction'),
   ('HIS000000', 'History',                      'NON000000', 'non-fiction/history'),
   ('BIO000000', 'Biography & Memoir',           'NON000000', 'non-fiction/biography'),
   ('COM000000', 'Computing',                    'NON000000', 'non-fiction/computing'),
   ('SCI000000', 'Science & Nature',             'NON000000', 'non-fiction/science'),
-  ('SCI040000', 'Physics',                      'SCI000000', 'non-fiction/science/physics'),
+  ('SCI055000', 'Physics',                      'SCI000000', 'non-fiction/science/physics'),
   ('SCI013000', 'Chemistry',                    'SCI000000', 'non-fiction/science/chemistry'),
-  ('NAT000000', 'Biology & Natural History',    'SCI000000', 'non-fiction/science/biology'),
-  ('MED000000', 'Medicine & Health',            'SCI000000', 'non-fiction/science/medicine'),
+  ('SCI008000', 'Biology',                      'SCI000000', 'non-fiction/science/biology'),
+  ('MED000000', 'Medicine',                     'SCI000000', 'non-fiction/science/medicine'),
   ('MAT000000', 'Mathematics',                  'SCI000000', 'non-fiction/science/mathematics'),
-  ('SCI026000', 'Environment & Climate Change', 'SCI000000', 'non-fiction/science/environment'),
-  ('POL000000', 'Social Sciences & Politics',   'NON000000', 'non-fiction/social-sciences'),
-  ('ECO000000', 'Economics',                    'POL000000', 'non-fiction/social-sciences/economics'),
+  ('NAT000000', 'Environment & Climate Change', 'SCI000000', 'non-fiction/science/environment'),
+  ('SOC000000', 'Social Sciences & Politics',   'NON000000', 'non-fiction/social-sciences'),
+  ('BUS069000', 'Economics',                    'SOC000000', 'non-fiction/social-sciences/economics'),
+  ('POL062000', 'Geopolitics',                  'SOC000000', 'non-fiction/social-sciences/geopolitics'),
   ('PHI000000', 'Philosophy',                   'NON000000', 'non-fiction/philosophy'),
-  ('PHI015000', 'Political Philosophy',         'PHI000000', 'non-fiction/philosophy/political'),
-  ('PHI012000', 'Epistemology',                 'PHI000000', 'non-fiction/philosophy/epistemology'),
-  ('PHI017000', 'Philosophy of Religion',       'PHI000000', 'non-fiction/philosophy/philosophy-of-religion'),
-  ('ARC014000', 'Urban Planning',               'NON000000', 'non-fiction/urban-planning'),
+  ('PHI019000', 'Political Philosophy',         'PHI000000', 'non-fiction/philosophy/political'),
+  ('PHI004000', 'Epistemology',                 'PHI000000', 'non-fiction/philosophy/epistemology'),
+  ('REL051000', 'Philosophy of Religion',       'PHI000000', 'non-fiction/philosophy/philosophy-of-religion'),
+  ('ARC010000', 'Urban Planning',               'NON000000', 'non-fiction/urban-planning'),
   ('REL000000', 'Religion',                     'NON000000', 'non-fiction/religion'),
-  ('REL027000', 'Islam',                        'REL000000', 'non-fiction/religion/islam'),
-  ('REL010000', 'Christianity',                 'REL000000', 'non-fiction/religion/christianity'),
-  ('REL012000', 'Christian Living',             'REL010000', 'non-fiction/religion/christianity/christian-living'),
-  ('REL011000', 'Christian Teaching',           'REL010000', 'non-fiction/religion/christianity/christian-teaching'),
-  ('REL011010', 'Ecclesiology',                 'REL011000', 'non-fiction/religion/christianity/christian-teaching/ecclesiology'),
-  ('REL011020', 'Doctrine',                     'REL011000', 'non-fiction/religion/christianity/christian-teaching/doctrine'),
-  ('REL011030', 'Apologetics',                  'REL011000', 'non-fiction/religion/christianity/christian-teaching/apologetics');
+  ('REL037000', 'Islam',                        'REL000000', 'non-fiction/religion/islam'),
+  ('REL070000', 'Christianity',                 'REL000000', 'non-fiction/religion/christianity'),
+  ('REL067000', 'Theology',                     'REL070000', 'non-fiction/religion/christianity/theology'),
+  ('REL012000', 'Christian Living',             'REL070000', 'non-fiction/religion/christianity/christian-living');
 
 -- Seed: default settings
 INSERT INTO settings (key, value) VALUES
