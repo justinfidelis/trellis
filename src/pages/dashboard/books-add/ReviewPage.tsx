@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ImageIcon, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -10,6 +10,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { getBookSearchResult, saveBookCopy, uploadCoverImage } from '@/api/books';
 import { useAddBooks } from '@/context/AddBooksContext';
 import type { BookDraft } from '@/context/AddBooksContext';
+import { CoverUpload } from './CoverUpload';
 
 const RETRY_DELAY_MS = 2500;
 const MAX_RETRIES = 2;
@@ -29,7 +30,6 @@ export function AddBooksReviewPage() {
   const [saving, setSaving] = useState(false);
   const [attemptedSave, setAttemptedSave] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
-  const coverInputRef = useRef<HTMLInputElement>(null);
 
   // Redirect if context has no ISBNs (e.g. direct URL access)
   useEffect(() => {
@@ -158,50 +158,12 @@ export function AddBooksReviewPage() {
         {/* Two-column: cover left, form right */}
         <div className="flex gap-8 items-start">
 
-          {/* Cover column */}
-          <div className="shrink-0 flex flex-col gap-3">
-            <div className="relative w-40 h-56 rounded border bg-muted flex items-center justify-center overflow-hidden">
-              {draft.cover_url ? (
-                <img src={draft.cover_url} alt="Cover" className="w-full h-full object-cover" />
-              ) : (
-                <ImageIcon className="size-8 text-muted-foreground" />
-              )}
-              {uploadingCover && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/70">
-                  <Loader2 className="size-5 animate-spin" />
-                </div>
-              )}
-            </div>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => coverInputRef.current?.click()}
-              disabled={uploadingCover}
-              className="w-full"
-            >
-              {draft.cover_url ? 'Change image' : 'Upload image'}
-            </Button>
-            {draft.cover_url && (
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => update({ cover_url: '' })}
-                disabled={uploadingCover}
-                className="w-full text-muted-foreground"
-              >
-                Remove
-              </Button>
-            )}
-            <input
-              ref={coverInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleCoverUpload}
-            />
-          </div>
+          <CoverUpload
+            coverUrl={draft.cover_url}
+            uploading={uploadingCover}
+            onUpload={handleCoverUpload}
+            onRemove={() => update({ cover_url: '' })}
+          />
 
           {/* Form column */}
           <div className="flex-1 min-w-0 space-y-4">

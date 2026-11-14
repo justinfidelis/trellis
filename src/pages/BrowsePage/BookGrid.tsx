@@ -1,5 +1,5 @@
 import type { CopyWithBook } from '@/hooks/useBooks';
-import { BookCard } from '@/components/books/BookCard';
+import { BookCard } from './BookCard';
 
 interface BookGridProps {
   books: CopyWithBook[];
