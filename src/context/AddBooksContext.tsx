@@ -5,6 +5,7 @@ export type BookDraft = {
   isbn: string;
   title: string;
   author: string;
+  genre_id: string;
   description: string;
   cover_url: string;
   owner_note: string;
@@ -22,7 +23,7 @@ type AddBooksContextValue = {
 const AddBooksContext = createContext<AddBooksContextValue | null>(null);
 
 function createEmptyDraft(isbn: string): BookDraft {
-  return { isbn, title: '', author: '', description: '', cover_url: '', owner_note: '', has_owner_note: false, status: 'available' };
+  return { isbn, title: '', author: '', genre_id: '', description: '', cover_url: '', owner_note: '', has_owner_note: false, status: 'available' };
 }
 
 export function AddBooksProvider({ children }: { children: React.ReactNode }) {

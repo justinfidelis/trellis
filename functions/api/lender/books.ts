@@ -1,4 +1,4 @@
-import { createBook, createCopy, getCopiesByOwner } from '../_lib/db';
+import { createCopy, getCopiesByOwner } from '../_lib/db';
 import { error, json, methodNotAllowed, unauthorized } from '../_lib/response';
 import type { AppContext } from '../_lib/types';
 
@@ -6,13 +6,13 @@ export async function onRequest(context: AppContext) {
   const user = context.data.user;
   if (!user) return unauthorized();
 
-  // GET — list own books + copies
+  // GET — list own copies
   if (context.request.method === 'GET') {
     const copies = await getCopiesByOwner(context.env.DB, user.id);
     return json(copies);
   }
 
-  // POST — add a new book + copy
+  // POST — add a new copy (self-contained listing)
   if (context.request.method === 'POST') {
     const body = await context.request.json() as {
       isbn?: string;
@@ -22,28 +22,26 @@ export async function onRequest(context: AppContext) {
       description?: string;
       cover_url?: string;
       owner_notes?: string;
+      status?: string;
     };
 
     if (!body.title || !body.author || !body.genre_id) {
       return error('title, author and genre_id are required');
     }
 
-    const bookId = await createBook(context.env.DB, {
+    const copyId = await createCopy(context.env.DB, {
       isbn: body.isbn,
       title: body.title,
       author: body.author,
       genre_id: body.genre_id,
       description: body.description,
       cover_url: body.cover_url,
-    });
-
-    const copyId = await createCopy(context.env.DB, {
-      book_id: bookId,
       owner_id: user.id,
       owner_notes: body.owner_notes,
+      status: body.status,
     });
 
-    return json({ book_id: bookId, copy_id: copyId }, 201);
+    return json({ copy_id: copyId }, 201);
   }
 
   return methodNotAllowed();

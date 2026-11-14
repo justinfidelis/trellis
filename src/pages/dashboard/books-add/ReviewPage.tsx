@@ -10,6 +10,7 @@ import { PageShell } from '@/components/layout/PageShell';
 import { getBookSearchResult, saveBookCopy, uploadCoverImage } from '@/api/books';
 import { useAddBooks } from '@/context/AddBooksContext';
 import type { BookDraft } from '@/context/AddBooksContext';
+import { GenrePicker } from '@/components/books/GenrePicker';
 import { CoverUpload } from './CoverUpload';
 
 const RETRY_DELAY_MS = 2500;
@@ -96,7 +97,7 @@ export function AddBooksReviewPage() {
   async function handleSave() {
     if (!draft) return;
     setAttemptedSave(true);
-    if (!draft.title.trim() || !draft.author.trim()) return;
+    if (!draft.title.trim() || !draft.author.trim() || !draft.genre_id) return;
     setSaving(true);
     try {
       await saveBookCopy(draft);
@@ -129,6 +130,7 @@ export function AddBooksReviewPage() {
 
   const titleError = attemptedSave && !draft.title.trim();
   const authorError = attemptedSave && !draft.author.trim();
+  const genreError = attemptedSave && !draft.genre_id;
 
   return (
     <PageShell>
@@ -196,6 +198,20 @@ export function AddBooksReviewPage() {
               />
               {authorError && (
                 <p className="text-xs text-destructive">Author is required</p>
+              )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="genre">
+                Genre <span className="text-destructive">*</span>
+              </Label>
+              <GenrePicker
+                value={draft.genre_id}
+                onChange={(id) => update({ genre_id: id })}
+                invalid={genreError}
+              />
+              {genreError && (
+                <p className="text-xs text-destructive">Genre is required</p>
               )}
             </div>
 

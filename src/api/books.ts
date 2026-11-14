@@ -1,5 +1,3 @@
-import { mockBooks } from '@/data/mock';
-
 export type BookSearchData = {
   title: string;
   author: string;
@@ -12,41 +10,18 @@ export type GetBookResult =
   | { status: 'not_found' }
   | { status: 'pending' };
 
-// Mock state: tracks when each ISBN will be "ready" after a batch submit
-const MOCK_STAGGER_MS = 800;
-let mockReadyTimes: Record<string, number> = {};
-
 export async function submitISBNList(isbns: string[]): Promise<void> {
-  // TODO(backend): POST /api/books/search-batch { isbns }
-  // Backend begins staggered search and caches results as they arrive.
-  const now = Date.now();
-  mockReadyTimes = Object.fromEntries(
-    isbns.map((isbn, i) => [isbn, now + (i + 1) * MOCK_STAGGER_MS])
-  );
-  await new Promise<void>((r) => setTimeout(r, 100));
+  await fetch('/api/books/search-batch', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isbns }),
+  });
 }
 
 export async function getBookSearchResult(isbn: string): Promise<GetBookResult> {
-  // TODO(backend): GET /api/books/search/${isbn}
-  // Returns 200 { status: 'found', data: {...} } | 200 { status: 'not_found' } | 202 { status: 'pending' }
-  await new Promise<void>((r) => setTimeout(r, 120));
-  const readyAt = mockReadyTimes[isbn];
-  if (!readyAt || Date.now() < readyAt) {
-    return { status: 'pending' };
-  }
-  const book = mockBooks.find((b) => b.isbn === isbn);
-  if (book) {
-    return {
-      status: 'found',
-      data: {
-        title: book.title,
-        author: book.author,
-        cover_url: book.cover_url ?? undefined,
-        description: book.description ?? undefined,
-      },
-    };
-  }
-  return { status: 'not_found' };
+  const res = await fetch(`/api/books/search/${isbn}`);
+  if (!res.ok) return { status: 'not_found' };
+  return res.json() as Promise<GetBookResult>;
 }
 
 export async function uploadCoverImage(file: File): Promise<string> {
@@ -56,15 +31,32 @@ export async function uploadCoverImage(file: File): Promise<string> {
   return URL.createObjectURL(file);
 }
 
-export async function saveBookCopy(_draft: {
+export async function saveBookCopy(draft: {
   isbn: string;
   title: string;
   author: string;
+  genre_id: string;
   description: string;
   cover_url: string;
   owner_note: string;
   status: 'available' | 'unavailable';
 }): Promise<void> {
-  // TODO(backend): POST /api/copies { book: { isbn, title, author, description, cover_url }, copy: { owner_notes, status } }
-  await new Promise<void>((r) => setTimeout(r, 150));
+  const res = await fetch('/api/lender/books', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      isbn: draft.isbn || undefined,
+      title: draft.title,
+      author: draft.author,
+      genre_id: draft.genre_id,
+      description: draft.description || undefined,
+      cover_url: draft.cover_url || undefined,
+      owner_notes: draft.owner_note || undefined,
+      status: draft.status,
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.json() as { error?: string };
+    throw new Error(body.error ?? 'Failed to save book');
+  }
 }

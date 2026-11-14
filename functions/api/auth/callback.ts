@@ -57,7 +57,7 @@ export async function onRequest(context: EventContext<Env, string, Record<string
   const sessionId = await createSession(context.env.DB, user.id);
   const isSecure = url.protocol === 'https:';
 
-  const headers = new Headers({ Location: '/lender/books' });
+  const headers = new Headers({ Location: '/dashboard/books' });
   headers.append('Set-Cookie', setSessionCookie(sessionId, isSecure));
   headers.append('Set-Cookie', clearStateCookie);
 
