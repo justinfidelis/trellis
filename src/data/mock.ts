@@ -152,7 +152,7 @@ export const mockCopies: Copy[] = [
   { id: 'c11', book_id: 'b10', owner_id: 'u2', owner_notes: null, status: 'available', created_at: '2025-03-21T10:00:00Z' },
   { id: 'c12', book_id: 'b10', owner_id: 'u1', owner_notes: null, status: 'on_loan', created_at: '2025-03-22T10:00:00Z' },
   { id: 'c13', book_id: 'b3', owner_id: 'u2', owner_notes: null, status: 'reserved', created_at: '2025-02-03T10:00:00Z' },
-  { id: 'c14', book_id: 'b6', owner_id: 'u1', owner_notes: null, status: 'on_loan', created_at: '2025-03-03T10:00:00Z' },
+  { id: 'c14', book_id: 'b6', owner_id: 'u1', owner_notes: null, status: 'available', created_at: '2025-03-03T10:00:00Z' },
   { id: 'c15', book_id: 'b2', owner_id: 'u2', owner_notes: null, status: 'available', created_at: '2025-01-22T10:00:00Z' },
 ];
 
@@ -160,11 +160,14 @@ export const mockRequests: Request[] = [
   { id: 'r1', book_id: 'b2', lender_id: 'u1', copy_id: 'c3', borrower_name: 'Dana Lee', borrower_tele: 'danalee', status: 'ready', requested_at: '2025-03-01T09:00:00Z', ready_at: '2025-03-05T09:00:00Z', loaned_at: null, returned_at: null },
   { id: 'r2', book_id: 'b1', lender_id: 'u2', copy_id: 'c2', borrower_name: 'Evan Koh', borrower_tele: 'evankoh', status: 'on_loan', requested_at: '2025-02-20T09:00:00Z', ready_at: '2025-02-22T09:00:00Z', loaned_at: '2025-02-25T09:00:00Z', returned_at: null },
   { id: 'r3', book_id: 'b4', lender_id: 'u2', copy_id: 'c5', borrower_name: 'Fiona Yap', borrower_tele: 'fionayap', status: 'on_loan', requested_at: '2025-02-12T09:00:00Z', ready_at: '2025-02-14T09:00:00Z', loaned_at: '2025-02-18T09:00:00Z', returned_at: null },
-  { id: 'r4', book_id: 'b9', lender_id: 'u1', copy_id: 'c10', borrower_name: 'George Wee', borrower_tele: 'georgewee', status: 'queued', requested_at: '2025-03-18T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
-  { id: 'r5', book_id: 'b3', lender_id: 'u2', copy_id: 'c13', borrower_name: 'Hannah Sim', borrower_tele: 'hannahsim', status: 'queued', requested_at: '2025-03-19T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
+  { id: 'r4', book_id: 'b9', lender_id: 'u1', copy_id: 'c10', borrower_name: 'George Wee', borrower_tele: 'georgewee', status: 'ready', requested_at: '2025-03-18T09:00:00Z', ready_at: '2025-03-20T09:00:00Z', loaned_at: null, returned_at: null },
+  { id: 'r5', book_id: 'b3', lender_id: 'u2', copy_id: 'c13', borrower_name: 'Hannah Sim', borrower_tele: 'hannahsim', status: 'ready', requested_at: '2025-03-19T09:00:00Z', ready_at: '2025-03-21T09:00:00Z', loaned_at: null, returned_at: null },
   { id: 'r6', book_id: 'b6', lender_id: 'u1', copy_id: 'c14', borrower_name: 'Ian Chan', borrower_tele: 'ianchan', status: 'returned', requested_at: '2025-02-10T09:00:00Z', ready_at: '2025-02-12T09:00:00Z', loaned_at: '2025-02-15T09:00:00Z', returned_at: '2025-03-01T09:00:00Z' },
   { id: 'r7', book_id: 'b7', lender_id: 'u1', copy_id: null, borrower_name: 'Jess Ong', borrower_tele: 'jessong', status: 'cancelled', requested_at: '2025-03-10T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
   { id: 'r8', book_id: 'b10', lender_id: 'u1', copy_id: 'c12', borrower_name: 'Kevin Tan', borrower_tele: 'kevintan', status: 'on_loan', requested_at: '2025-03-23T09:00:00Z', ready_at: '2025-03-24T09:00:00Z', loaned_at: '2025-03-26T09:00:00Z', returned_at: null },
+  { id: 'r9', book_id: 'b10', lender_id: 'u1', copy_id: 'c12', borrower_name: 'Linda Ho', borrower_tele: 'lindaho', status: 'queued', requested_at: '2025-03-27T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
+  { id: 'r10', book_id: 'b10', lender_id: 'u1', copy_id: 'c12', borrower_name: 'Mike Teo', borrower_tele: 'miketeo', status: 'queued', requested_at: '2025-03-28T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
+  { id: 'r11', book_id: 'b2', lender_id: 'u1', copy_id: 'c3', borrower_name: 'Nina Goh', borrower_tele: 'ninagoh', status: 'queued', requested_at: '2025-03-06T09:00:00Z', ready_at: null, loaned_at: null, returned_at: null },
 ];
 
 export const mockPasscodes: Passcode[] = [
