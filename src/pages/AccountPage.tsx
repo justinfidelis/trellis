@@ -1,7 +1,9 @@
+import { PageShell } from '@/components/layout/PageShell';
+
 export function AccountPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-semibold">Account</h1>
-    </div>
+    <PageShell>
+      <h1 className="text-2xl font-semibold tracking-tight">Account</h1>
+    </PageShell>
   );
 }
