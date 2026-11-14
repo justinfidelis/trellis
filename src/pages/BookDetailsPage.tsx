@@ -78,6 +78,9 @@ export function BookDetailsPage() {
           <div className="space-y-4 min-w-0 flex-1">
             <div className="space-y-0.5">
               <h1 className="text-2xl font-semibold tracking-tight">{item.title}</h1>
+              {item.subtitle && (
+                <p className="text-base text-muted-foreground">{item.subtitle}</p>
+              )}
               <p className="text-muted-foreground">{item.author}</p>
             </div>
 
@@ -104,6 +107,12 @@ export function BookDetailsPage() {
                 <span className="text-muted-foreground w-20 shrink-0">Status</span>
                 <StatusBadge status={item.status} />
               </div>
+              {item.isbn && (
+                <div className="flex items-center gap-3">
+                  <span className="text-muted-foreground w-20 shrink-0">ISBN</span>
+                  <span className="font-mono text-xs">{item.isbn}</span>
+                </div>
+              )}
             </div>
 
             {genre && (

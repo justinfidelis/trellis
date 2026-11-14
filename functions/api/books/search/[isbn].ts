@@ -12,6 +12,6 @@ export async function onRequest(context: EventContext<Env, string, Record<string
 
   return json({
     status: 'found',
-    data: { title: book.title, author: book.author, cover_url: book.cover_url ?? '' },
+    data: { title: book.title, subtitle: book.subtitle, author: book.author, cover_url: book.cover_url ?? '' },
   });
 }

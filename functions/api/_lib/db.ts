@@ -92,16 +92,16 @@ export async function getCopiesByOwner(db: D1Database, ownerId: string) {
 }
 
 export async function createCopy(db: D1Database, copy: {
-  isbn?: string; title: string; author: string; genre_id: string;
+  isbn?: string; title: string; subtitle?: string; author: string; genre_id: string;
   description?: string; cover_url?: string;
   owner_id: string; owner_notes?: string; status?: string;
 }) {
   const id = generateId();
   await db.prepare(
-    `INSERT INTO copies (id, isbn, title, author, genre_id, description, cover_url, owner_id, owner_notes, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO copies (id, isbn, title, subtitle, author, genre_id, description, cover_url, owner_id, owner_notes, status)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
   ).bind(
-    id, copy.isbn ?? null, copy.title, copy.author, copy.genre_id,
+    id, copy.isbn ?? null, copy.title, copy.subtitle ?? '', copy.author, copy.genre_id,
     copy.description ?? null, copy.cover_url ?? null,
     copy.owner_id, copy.owner_notes ?? null, copy.status ?? 'available',
   ).run();
@@ -122,7 +122,7 @@ export async function updateCopy(db: D1Database, id: string, fields: {
 
 export async function getCopyById(db: D1Database, id: string) {
   return db.prepare('SELECT * FROM copies WHERE id = ?').bind(id).first<{
-    id: string; isbn: string | null; title: string; author: string; genre_id: string;
+    id: string; isbn: string | null; title: string; subtitle: string; author: string; genre_id: string;
     description: string | null; cover_url: string | null;
     owner_id: string; owner_notes: string | null; status: string; created_at: string;
   }>();
@@ -228,8 +228,8 @@ export async function deletePasscode(db: D1Database, id: string) {
 
 export async function getCachedBook(db: D1Database, isbn: string) {
   return db.prepare(
-    'SELECT title, author, cover_url FROM book_cache WHERE isbn = ?'
-  ).bind(isbn).first<{ title: string; author: string; cover_url: string | null }>();
+    'SELECT title, subtitle, author, cover_url FROM book_cache WHERE isbn = ?'
+  ).bind(isbn).first<{ title: string; subtitle: string; author: string; cover_url: string | null }>();
 }
 
 export async function getUncachedISBNs(db: D1Database, isbns: string[]): Promise<string[]> {
@@ -245,14 +245,14 @@ export async function getUncachedISBNs(db: D1Database, isbns: string[]): Promise
 export async function cacheBook(
   db: D1Database,
   isbn: string,
-  data: { title: string; author: string; cover_url: string },
+  data: { title: string; subtitle: string; author: string; cover_url: string },
 ) {
   const id = generateId();
   await db.prepare(
-    `INSERT INTO book_cache (id, isbn, title, author, cover_url)
-     VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO book_cache (id, isbn, title, subtitle, author, cover_url)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(isbn) DO NOTHING`
-  ).bind(id, isbn, data.title, data.author, data.cover_url).run();
+  ).bind(id, isbn, data.title, data.subtitle, data.author, data.cover_url).run();
 }
 
 // ── Settings ─────────────────────────────────────────────────────────────────

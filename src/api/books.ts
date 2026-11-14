@@ -1,5 +1,6 @@
 export type BookSearchData = {
   title: string;
+  subtitle?: string;
   author: string;
   cover_url?: string;
   description?: string;
@@ -39,6 +40,7 @@ export async function uploadCoverImage(file: File): Promise<string> {
 export async function saveBookCopy(draft: {
   isbn: string;
   title: string;
+  subtitle: string;
   author: string;
   genre_id: string;
   description: string;
@@ -52,6 +54,7 @@ export async function saveBookCopy(draft: {
     body: JSON.stringify({
       isbn: draft.isbn || undefined,
       title: draft.title,
+      subtitle: draft.subtitle || undefined,
       author: draft.author,
       genre_id: draft.genre_id,
       description: draft.description || undefined,

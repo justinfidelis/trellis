@@ -16,6 +16,7 @@ const EXT: Record<string, string> = {
 
 type OLBooksEntry = {
   title?: string;
+  subtitle?: string;
   authors?: Array<{ name: string }>;
   cover?: { small?: string; medium?: string; large?: string };
 };
@@ -49,7 +50,7 @@ async function replicateCover(r2: R2Bucket, url: string): Promise<string> {
 async function fetchOpenLibraryBook(
   r2: R2Bucket,
   isbn: string,
-): Promise<{ title: string; author: string; cover_url: string } | null> {
+): Promise<{ title: string; subtitle: string; author: string; cover_url: string } | null> {
   const bibKey = `ISBN:${isbn}`;
   try {
     const res = await fetch(
@@ -82,7 +83,7 @@ async function fetchOpenLibraryBook(
     const candidateCover = entry.cover?.large ?? `${OL_COVERS}/${isbn}-L.jpg`;
     const cover_url = await replicateCover(r2, candidateCover);
 
-    return { title: entry.title, author, cover_url };
+    return { title: entry.title, subtitle: entry.subtitle?.trim() ?? '', author, cover_url };
   } catch {
     return null;
   }
