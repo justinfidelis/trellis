@@ -8,6 +8,9 @@ import { BasketPage } from '@/pages/BasketPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { AccountPage } from '@/pages/AccountPage';
 import { MyBooksPage } from '@/pages/lender/MyBooksPage';
+import { AddBooksLayout } from '@/pages/lender/AddBooksLayout';
+import { AddBooksInputPage } from '@/pages/lender/AddBooksInputPage';
+import { AddBooksReviewPage } from '@/pages/lender/AddBooksReviewPage';
 import { LendersPage } from '@/pages/admin/LendersPage';
 import { BasketProvider } from '@/context/BasketContext';
 
@@ -32,6 +35,10 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route element={<DashboardLayout />}>
               <Route path="/dashboard/books" element={<RequireAuth role="lender"><MyBooksPage /></RequireAuth>} />
+              <Route path="/dashboard/books/add" element={<RequireAuth role="lender"><AddBooksLayout /></RequireAuth>}>
+                <Route index element={<AddBooksInputPage />} />
+                <Route path="review/:index" element={<AddBooksReviewPage />} />
+              </Route>
               <Route path="/dashboard/account" element={<RequireAuth><AccountPage /></RequireAuth>} />
               <Route path="/dashboard/admin" element={<RequireAuth role="admin"><LendersPage /></RequireAuth>} />
             </Route>

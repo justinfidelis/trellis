@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowUpDown, ArrowUp, ArrowDown, BookOpen, ListFilter, Search, Plus, ChevronLeft, ChevronRight, Pencil, Loader2 } from 'lucide-react';
 import { CoverImage } from '@/components/books/CoverImage';
 import { Badge } from '@/components/ui/badge';
@@ -173,6 +173,7 @@ function QueuePopover({ queue }: { queue: Request[] }) {
 type BookRow = { copy: Copy; book: Book; primary: Request | null; queue: Request[] };
 
 export function MyBooksPage() {
+  const navigate = useNavigate();
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortDir, setSortDir] = useState<SortDir>('asc');
   const [statusFilter, setStatusFilter] = useState<Set<CopyStatus>>(new Set(ALL_STATUSES));
@@ -291,7 +292,7 @@ export function MyBooksPage() {
                 className="pl-9 w-72"
               />
             </div>
-            <Button className="shrink-0 ml-auto">
+            <Button className="shrink-0 ml-auto" onClick={() => navigate('/dashboard/books/add')}>
               <Plus className="size-4" />
               Add Book
             </Button>
