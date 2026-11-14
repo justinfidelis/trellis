@@ -25,6 +25,7 @@ export interface Copy {
   id: string;
   isbn: string | null;
   title: string;
+  subtitle: string;
   author: string;
   genre_id: string;
   description: string | null;

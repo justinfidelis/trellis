@@ -17,6 +17,7 @@ export async function onRequest(context: AppContext) {
     const body = await context.request.json() as {
       isbn?: string;
       title: string;
+      subtitle?: string;
       author: string;
       genre_id: string;
       description?: string;
@@ -32,6 +33,7 @@ export async function onRequest(context: AppContext) {
     const copyId = await createCopy(context.env.DB, {
       isbn: body.isbn,
       title: body.title,
+      subtitle: body.subtitle,
       author: body.author,
       genre_id: body.genre_id,
       description: body.description,

@@ -64,6 +64,7 @@ export function AddBooksReviewPage() {
             // Auto-fill only empty fields so user edits aren't overwritten
             updateDraft(isbn, {
               title: drafts[isbn]?.title || result.data.title,
+              subtitle: drafts[isbn]?.subtitle || (result.data.subtitle ?? ''),
               author: drafts[isbn]?.author || result.data.author,
               cover_url: drafts[isbn]?.cover_url || (result.data.cover_url ?? ''),
               description: drafts[isbn]?.description || (result.data.description ?? ''),
@@ -183,6 +184,15 @@ export function AddBooksReviewPage() {
               {titleError && (
                 <p className="text-xs text-destructive">Title is required</p>
               )}
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="subtitle">Subtitle</Label>
+              <Input
+                id="subtitle"
+                value={draft.subtitle}
+                onChange={(e) => update({ subtitle: e.target.value })}
+              />
             </div>
 
             <div className="space-y-1.5">
